@@ -1,32 +1,46 @@
 import { useEffect, useState } from "react";
-import { Device } from "models";
+import { Device, OidRecord } from "models";
 import { DevicesClient } from "clients/devices.client";
-import { Card, CardContent, Typography, Grid, Table, TableBody, TableCell, TableHead, TableRow, Box, Divider, } from "@mui/material";
+import { Card, CardContent, Typography, Grid, Table, TableBody, TableCell, TableHead, TableRow, Box, Divider, Chip, Tooltip, } from "@mui/material";
+import { OidRecordsClient } from "clients/oid-records.client";
 
 export const MainPage = () => {
-    const [devices, setDevices] = useState<Device[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [records, setRecords] = useState<OidRecord[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  
+  useEffect(() => {
+    loadDevices();
+    loadRecords();
+  }, []);
 
-    useEffect(() => {
-        loadDevices();
-    }, []);
-
-    const loadDevices = async () => {
-        try {
-            const devices = await DevicesClient.getAll();
-            setDevices(devices);
-        } catch (error) {
-            console.log("Error al cargar dispositivos: ", error);
-        } finally {
-            setLoading(false);
-        }
+  const loadDevices = async (): Promise<void> => {
+    try {
+      const devices = await DevicesClient.getAll();
+      setDevices(devices);
+    } catch (error) {
+      console.log("Error al cargar dispositivos: ", error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    if (loading) return <p>Cargando dispositivos...</p>
+  const loadRecords = async (): Promise<void> => {
+    try {
+      const records = await OidRecordsClient.getAll();
+      setRecords(records);
+    } catch (error) {
+      console.log("Error al cargar dispositivos: ", error);
+    }
+  };
 
-    if (devices.length === 0) {
-    return <Typography>No hay dispositivos configurados.</Typography>;
-  }
+  const getRecordForOid = (deviceId: number, oid: string): OidRecord | undefined => {
+    return records.find((record) => record.deviceId === deviceId && record.oid === oid);
+  };
+
+  if (loading) return <p>Cargando dispositivos...</p>
+
+  if (devices.length === 0) return <Typography>No hay dispositivos configurados.</Typography>
 
   return (
     <Grid container spacing={3}>
@@ -50,7 +64,7 @@ export const MainPage = () => {
               <Divider sx={{ my: 1 }} />
 
               <Typography variant="subtitle2" gutterBottom>
-                OIDs configurados:
+                OIDs y valores actuales:
               </Typography>
 
               <Table size="small">
@@ -58,17 +72,45 @@ export const MainPage = () => {
                   <TableRow>
                     <TableCell>Nombre</TableCell>
                     <TableCell>OID</TableCell>
+                    <TableCell>Valor</TableCell>
                     <TableCell align="right">Frecuencia</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {device.oids.map((oid) => (
-                    <TableRow key={oid.oid}>
-                      <TableCell>{oid.name}</TableCell>
-                      <TableCell>{oid.oid}</TableCell>
-                      <TableCell align="right">{oid.frequency}s</TableCell>
-                    </TableRow>
-                  ))}
+                  {device.oids.map((oid) => {
+                    const record = getRecordForOid(device.id, oid.oid);
+                    const displayValue = record
+                      ? record.error
+                        ? `⚠️ ${record.error}`
+                        : record.value ?? "-"
+                      : "-";
+
+                    return (
+                      <TableRow key={oid.oid}>
+                        <TableCell>
+                          <Tooltip title={oid.oid}>
+                            <span>{oid.name}</span>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell>
+                          {oid.oid}
+                        </TableCell>
+                        <TableCell>
+                          {record?.error ? (
+                            <Chip label="Error" color="error" size="small" />
+                          ) : (
+                            <Typography
+                              variant="body2"
+                              color={record ? "text.primary" : "text.disabled"}
+                            >
+                              {displayValue}
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell align="right">{oid.frequency}s</TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </CardContent>
