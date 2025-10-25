@@ -28,6 +28,6 @@ const { set, add, remove } = devicesSlice.actions;
 
 export const setAction = set as ActionCreatorWithPayload<Device[]>;
 export const addAction = add as ActionCreatorWithPayload<Device>;
-export const removeDevice = remove as ActionCreatorWithPayload<number>;
+export const removeAction = remove as ActionCreatorWithPayload<number>;
 
 export const reducer = devicesSlice.reducer;

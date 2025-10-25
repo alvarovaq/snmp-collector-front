@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Device, OidRecord, OidRecordID, WSEvent } from "models";
-import { OidRecordsModule, ReduxState } from "store";
+import { DevicesModule, OidRecordsModule, ReduxState } from "store";
 import { Card, CardContent, Typography, Grid, Table, TableBody, TableCell, TableHead, TableRow, Box, Divider, Chip, Tooltip, } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { loadInitialData } from "./LoaderData";
@@ -32,9 +32,19 @@ export const MainPage = () => {
       dispatch(OidRecordsModule.removeAction(data as OidRecordID[]));
     });
 
+    const rmUpdateDevice = addHandler(WSEvent.UpdateDevice, (data) => {
+      dispatch(DevicesModule.addAction(data as Device));
+    });
+
+    const rmRemoveDevice = addHandler(WSEvent.RemoveDevice, (data) => {
+      dispatch(DevicesModule.removeAction(data as number));
+    });
+
     return () => {
       rmUpdateRecords();
       rmRemoveRecords();
+      rmUpdateDevice();
+      rmRemoveDevice();
     };
   }, [addHandler]);
 
