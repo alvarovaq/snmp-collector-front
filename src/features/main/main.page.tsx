@@ -1,38 +1,33 @@
 import { useEffect, useState } from "react";
 import { Device, OidRecord } from "models";
-import { DevicesClient } from "clients/devices.client";
+import { ReduxState } from "store";
 import { Card, CardContent, Typography, Grid, Table, TableBody, TableCell, TableHead, TableRow, Box, Divider, Chip, Tooltip, } from "@mui/material";
-import { OidRecordsClient } from "clients/oid-records.client";
+import { useDispatch, useSelector } from "react-redux";
+import { loadInitialData } from "./LoaderData";
+
+const selectDevices = (state: ReduxState): Device[] => state.devices;
+const selectOidRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
 
 export const MainPage = () => {
-  const [devices, setDevices] = useState<Device[]>([]);
-  const [records, setRecords] = useState<OidRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const dispatch = useDispatch();
+  const devices: Device[] = useSelector(selectDevices);
+  const records: OidRecord[] = useSelector(selectOidRecords);
   
   useEffect(() => {
-    loadDevices();
-    loadRecords();
-  }, []);
+    loadInitialData(dispatch)
+      .finally(() => setLoading(false));
 
-  const loadDevices = async (): Promise<void> => {
-    try {
-      const devices = await DevicesClient.getAll();
-      setDevices(devices);
-    } catch (error) {
-      console.log("Error al cargar dispositivos: ", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const interval = setInterval(() => {
+      loadInitialData(dispatch);
+    }, 10000);
 
-  const loadRecords = async (): Promise<void> => {
-    try {
-      const records = await OidRecordsClient.getAll();
-      setRecords(records);
-    } catch (error) {
-      console.log("Error al cargar dispositivos: ", error);
-    }
-  };
+    return () => {
+      clearInterval(interval);
+    };
+
+  }, [dispatch]);
 
   const getRecordForOid = (deviceId: number, oid: string): OidRecord | undefined => {
     return records.find((record) => record.deviceId === deviceId && record.oid === oid);
