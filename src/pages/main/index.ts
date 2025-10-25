@@ -1,0 +1,1 @@
+export * from "./containers/main.page";
