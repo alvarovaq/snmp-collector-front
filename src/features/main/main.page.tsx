@@ -1,38 +1,44 @@
 import { useEffect, useState } from "react";
 import { Device, OidRecord } from "models";
+import { DevicesModule, ReduxState } from "store";
 import { DevicesClient } from "clients/devices.client";
 import { Card, CardContent, Typography, Grid, Table, TableBody, TableCell, TableHead, TableRow, Box, Divider, Chip, Tooltip, } from "@mui/material";
 import { OidRecordsClient } from "clients/oid-records.client";
+import { useDispatch, useSelector } from "react-redux";
+
+const selectDevices = (state: ReduxState): Device[] => state.devices;
 
 export const MainPage = () => {
-  const [devices, setDevices] = useState<Device[]>([]);
   const [records, setRecords] = useState<OidRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const dispatch = useDispatch();
+  const devices: Device[] = useSelector(selectDevices);
   
   useEffect(() => {
+    const loadDevices = async (): Promise<void> => {
+      try {
+        const devices = await DevicesClient.getAll();
+        dispatch(DevicesModule.setAction(devices));
+      } catch (error) {
+        console.log("Error al cargar dispositivos: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const loadRecords = async (): Promise<void> => {
+      try {
+        const records = await OidRecordsClient.getAll();
+        setRecords(records);
+      } catch (error) {
+        console.log("Error al cargar dispositivos: ", error);
+      }
+    };
+
     loadDevices();
     loadRecords();
-  }, []);
-
-  const loadDevices = async (): Promise<void> => {
-    try {
-      const devices = await DevicesClient.getAll();
-      setDevices(devices);
-    } catch (error) {
-      console.log("Error al cargar dispositivos: ", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadRecords = async (): Promise<void> => {
-    try {
-      const records = await OidRecordsClient.getAll();
-      setRecords(records);
-    } catch (error) {
-      console.log("Error al cargar dispositivos: ", error);
-    }
-  };
+  }, [dispatch]);
 
   const getRecordForOid = (deviceId: number, oid: string): OidRecord | undefined => {
     return records.find((record) => record.deviceId === deviceId && record.oid === oid);
