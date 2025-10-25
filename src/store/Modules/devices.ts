@@ -11,18 +11,23 @@ export const devicesSlice: Slice<Device[]> = createSlice({
             return action.payload;
         }),
         add: create.reducer<Device>((state, action) => {
-            state.push(action.payload);
+            const index = state.findIndex((d) => d.id === action.payload.id);
+            if (index !== -1) {
+                state[index] = action.payload;
+            } else {
+                state.push(action.payload);
+            }
         }),
-        update: create.reducer<Device>((state, action) => {}),
-        remove: create.reducer<number>((state, action) => {}),
+        remove: create.reducer<number>((state, action) => {
+            return state.filter((d) => d.id !== action.payload);
+        }),
     }),
 });
 
-const { set, add, update, remove } = devicesSlice.actions;
+const { set, add, remove } = devicesSlice.actions;
 
 export const setAction = set as ActionCreatorWithPayload<Device[]>;
 export const addAction = add as ActionCreatorWithPayload<Device>;
-export const updateAction = update as ActionCreatorWithPayload<Device>;
 export const removeDevice = remove as ActionCreatorWithPayload<number>;
 
 export const reducer = devicesSlice.reducer;
