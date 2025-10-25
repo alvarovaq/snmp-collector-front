@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { Device, OidRecord } from "models";
-import { DevicesModule, OidRecordsModule, ReduxState } from "store";
-import { DevicesClient } from "clients/devices.client";
+import { ReduxState } from "store";
 import { Card, CardContent, Typography, Grid, Table, TableBody, TableCell, TableHead, TableRow, Box, Divider, Chip, Tooltip, } from "@mui/material";
-import { OidRecordsClient } from "clients/oid-records.client";
 import { useDispatch, useSelector } from "react-redux";
+import { loadInitialData } from "./LoaderData";
 
 const selectDevices = (state: ReduxState): Device[] => state.devices;
 const selectOidRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
@@ -17,28 +16,17 @@ export const MainPage = () => {
   const records: OidRecord[] = useSelector(selectOidRecords);
   
   useEffect(() => {
-    const loadDevices = async (): Promise<void> => {
-      try {
-        const devices = await DevicesClient.getAll();
-        dispatch(DevicesModule.setAction(devices));
-      } catch (error) {
-        console.log("Error al cargar dispositivos: ", error);
-      } finally {
-        setLoading(false);
-      }
+    loadInitialData(dispatch)
+      .finally(() => setLoading(false));
+
+    const interval = setInterval(() => {
+      loadInitialData(dispatch);
+    }, 10000);
+
+    return () => {
+      clearInterval(interval);
     };
 
-    const loadRecords = async (): Promise<void> => {
-      try {
-        const records = await OidRecordsClient.getAll();
-        dispatch(OidRecordsModule.setAction(records));
-      } catch (error) {
-        console.log("Error al cargar dispositivos: ", error);
-      }
-    };
-
-    loadDevices();
-    loadRecords();
   }, [dispatch]);
 
   const getRecordForOid = (deviceId: number, oid: string): OidRecord | undefined => {
