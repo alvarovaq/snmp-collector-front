@@ -10,16 +10,23 @@ export const oidRecordsSlice: Slice<OidRecord[]> = createSlice({
         set: create.reducer<OidRecord[]>((state, action) => {
             return action.payload;
         }),
-        add: create.reducer<OidRecord>((state, action) => {
-            const index = state.findIndex((d) => d.deviceId === action.payload.deviceId && d.oid === action.payload.oid);
-            if (index !== -1) {
-                state[index] = action.payload;
-            } else {
-                state.push(action.payload);
-            }
+        add: create.reducer<OidRecord[]>((state, action) => {
+            action.payload.forEach((record) => {
+                const index = state.findIndex((d) => d.deviceId === record.deviceId && d.oid === record.oid);
+                if (index !== -1) {
+                    state[index] = record;
+                } else {
+                    state.push(record);
+                }
+            });
         }),
-        remove: create.reducer<OidRecordID>((state, action) => {
-            return state.filter((d) => d.deviceId !== action.payload.deviceId || d.oid !== action.payload.oid);
+        remove: create.reducer<OidRecordID[]>((state, action) => {
+            action.payload.forEach((id) => {
+                const index = state.findIndex((d) => d.deviceId === id.deviceId && d.oid === id.oid);
+                if (index !== -1) {
+                    state.splice(index, 1);
+                }
+            });
         }),
     }),
 });
@@ -27,7 +34,7 @@ export const oidRecordsSlice: Slice<OidRecord[]> = createSlice({
 const { set, add, remove } = oidRecordsSlice.actions;
 
 export const setAction = set as ActionCreatorWithPayload<OidRecord[]>;
-export const addAction = add as ActionCreatorWithPayload<OidRecord>;
-export const removeDevice = remove as ActionCreatorWithPayload<OidRecordID>;
+export const addAction = add as ActionCreatorWithPayload<OidRecord[]>;
+export const removeAction = remove as ActionCreatorWithPayload<OidRecordID[]>;
 
 export const reducer = oidRecordsSlice.reducer;

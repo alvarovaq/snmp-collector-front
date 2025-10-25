@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Device, OidRecord } from "models";
-import { ReduxState } from "store";
+import { Device, OidRecord, OidRecordID, WSEvent } from "models";
+import { DevicesModule, OidRecordsModule, ReduxState } from "store";
 import { Card, CardContent, Typography, Grid, Table, TableBody, TableCell, TableHead, TableRow, Box, Divider, Chip, Tooltip, } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { loadInitialData } from "./LoaderData";
+import { useWS } from "context";
 
 const selectDevices = (state: ReduxState): Device[] => state.devices;
 const selectOidRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
@@ -14,20 +15,38 @@ export const MainPage = () => {
   const dispatch = useDispatch();
   const devices: Device[] = useSelector(selectDevices);
   const records: OidRecord[] = useSelector(selectOidRecords);
+
+  const { addHandler } = useWS();
   
   useEffect(() => {
     loadInitialData(dispatch)
       .finally(() => setLoading(false));
+  }, [dispatch]);
 
-    const interval = setInterval(() => {
-      loadInitialData(dispatch);
-    }, 10000);
+  useEffect(() => {
+    const rmUpdateRecords = addHandler(WSEvent.UpdateRecords, (data) => {
+      dispatch(OidRecordsModule.addAction(data as OidRecord[]));
+    });
+
+    const rmRemoveRecords = addHandler(WSEvent.RemoveRecords, (data) => {
+      dispatch(OidRecordsModule.removeAction(data as OidRecordID[]));
+    });
+
+    const rmUpdateDevice = addHandler(WSEvent.UpdateDevice, (data) => {
+      dispatch(DevicesModule.addAction(data as Device));
+    });
+
+    const rmRemoveDevice = addHandler(WSEvent.RemoveDevice, (data) => {
+      dispatch(DevicesModule.removeAction(data as number));
+    });
 
     return () => {
-      clearInterval(interval);
+      rmUpdateRecords();
+      rmRemoveRecords();
+      rmUpdateDevice();
+      rmRemoveDevice();
     };
-
-  }, [dispatch]);
+  }, [addHandler]);
 
   const getRecordForOid = (deviceId: number, oid: string): OidRecord | undefined => {
     return records.find((record) => record.deviceId === deviceId && record.oid === oid);
