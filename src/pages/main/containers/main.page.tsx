@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import { Device, OidRecord, OidRecordID, WSEvent } from "models";
-import { DevicesModule, OidRecordsModule } from "store";
-import { Box } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { loadInitialData } from "../utils/LoaderData";
-import { useWS } from "context";
-import Sidebar, { SidebarMenuItem } from "../components/Sidebar";
+import { Box } from "@mui/material";
 import HomeIcon from '@mui/icons-material/Home';
 import DnsIcon from '@mui/icons-material/Dns';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { Page } from "../models/pages.model";
+import { Device, OidRecord, OidRecordID, WSEvent } from "models";
+import { DevicesModule, OidRecordsModule } from "store";
+import { useWS } from "context";
 import { DevicePage } from "pages/devices";
+import { loadInitialData } from "../utils/LoaderData";
+import { SidebarMenuItem, SidebarComponent } from "../components";
+import { Page } from "../models";
 
 const appMenuItems: SidebarMenuItem[] = [
   { text: 'Inicio', icon: <HomeIcon />, page: Page.DASHBOARD },
@@ -30,7 +30,7 @@ export const MainPage = () => {
   useEffect(() => {
     loadInitialData(dispatch)
       .finally(() => setLoading(false));
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     const rmUpdateRecords = addHandler(WSEvent.UpdateRecords, (data) => {
@@ -55,13 +55,13 @@ export const MainPage = () => {
       rmUpdateDevice();
       rmRemoveDevice();
     };
-  }, [addHandler]);
+  }, [addHandler, dispatch]);
 
   if (loading) return <p>Cargando dispositivos...</p>
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
-      <Sidebar menuItems={appMenuItems} onNavigate={(page) => setCurrentPage(page)}/>
+      <SidebarComponent menuItems={appMenuItems} onNavigate={(page) => setCurrentPage(page)}/>
       <Box sx={{ flewGrow: 1, p: 4 }}>
         {
           currentPage === Page.DEVICES ?

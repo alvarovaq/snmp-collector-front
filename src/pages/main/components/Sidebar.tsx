@@ -1,17 +1,7 @@
 import React, { useState } from 'react';
 import Drawer from '@mui/material/Drawer';
-import Box from '@mui/material/Box';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import { useTheme } from '@mui/material/styles';
-import { SvgIconProps } from '@mui/material/SvgIcon';
-import { Page } from '../models/pages.model';
+import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Divider, useTheme, SvgIconProps } from '@mui/material';
+import { Page } from '../models';
 
 export interface SidebarMenuItem {
   text: string;
@@ -19,14 +9,14 @@ export interface SidebarMenuItem {
   page: Page;
 }
 
-interface ProfessionalSidebarProps {
+interface SidebarComponentProps {
   menuItems: SidebarMenuItem[];
   onNavigate: (page: Page) => void;
 }
 
 const drawerWidth = 260;
 
-function ProfessionalSidebar({ menuItems, onNavigate }: ProfessionalSidebarProps) {
+export const SidebarComponent = ({ menuItems, onNavigate }: SidebarComponentProps) => {
   const theme = useTheme();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -116,6 +106,4 @@ function ProfessionalSidebar({ menuItems, onNavigate }: ProfessionalSidebarProps
       </Drawer>
     </Box>
   );
-}
-
-export default ProfessionalSidebar;
+};
