@@ -8,7 +8,10 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { Device, OidRecord, OidRecordID, WSEvent } from "models";
 import { DevicesModule, OidRecordsModule } from "store";
 import { useWS } from "context";
+import { DashboardPage } from "pages/dashboard";
 import { DevicePage } from "pages/devices";
+import { AlertsPage } from "pages/alerts";
+import { SettingsPage } from "pages/settings";
 import { loadInitialData } from "../utils/LoaderData";
 import { SidebarMenuItem, SidebarComponent } from "../components";
 import { Page } from "../models";
@@ -64,9 +67,15 @@ export const MainPage = () => {
       <SidebarComponent menuItems={appMenuItems} onNavigate={(page) => setCurrentPage(page)}/>
       <Box sx={{ flewGrow: 1, p: 4 }}>
         {
-          currentPage === Page.DEVICES ?
-            (<DevicePage />) :
-            (<p>{currentPage}</p>)
+          currentPage === Page.DASHBOARD ?
+            (<DashboardPage />) :
+            currentPage === Page.DEVICES ?
+              (<DevicePage />) :
+              currentPage === Page.ALERTS ?
+                (<AlertsPage />) :
+                currentPage === Page.SETTINGS ?
+                  (<SettingsPage />) :
+                  (<p>Página no encontrada</p>)
         }
       </Box>
     </Box>
