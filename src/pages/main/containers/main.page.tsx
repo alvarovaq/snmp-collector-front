@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { Box } from "@mui/material";
+import { Box, Fade } from "@mui/material";
 import HomeIcon from '@mui/icons-material/Home';
 import DnsIcon from '@mui/icons-material/Dns';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -13,7 +13,7 @@ import { DevicePage } from "pages/devices";
 import { AlertsPage } from "pages/alerts";
 import { SettingsPage } from "pages/settings";
 import { loadInitialData } from "../utils/LoaderData";
-import { SidebarMenuItem, SidebarComponent } from "../components";
+import { SidebarMenuItem, SidebarComponent, LoadingComponent } from "../components";
 import { Page } from "../models";
 
 const appMenuItems: SidebarMenuItem[] = [
@@ -24,7 +24,7 @@ const appMenuItems: SidebarMenuItem[] = [
 ];
 
 export const MainPage = () => {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<Page>(Page.DASHBOARD);
   
   const dispatch = useDispatch();
@@ -60,7 +60,7 @@ export const MainPage = () => {
     };
   }, [addHandler, dispatch]);
 
-  if (loading) return <p>Cargando dispositivos...</p>
+  if (loading) return (<LoadingComponent />);
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
