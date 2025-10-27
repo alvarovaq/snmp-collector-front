@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { Box, Fade } from "@mui/material";
+import { Box } from "@mui/material";
 import HomeIcon from '@mui/icons-material/Home';
 import DnsIcon from '@mui/icons-material/Dns';
 import NotificationsIcon from '@mui/icons-material/Notifications';
