@@ -1,58 +1,18 @@
-import { useEffect, useState } from "react";
-import { Device, OidRecord, OidRecordID, WSEvent } from "models";
-import { DevicesModule, OidRecordsModule, ReduxState } from "store";
+import { Device, OidRecord } from "models";
+import { ReduxState } from "store";
 import { Card, CardContent, Typography, Grid, Table, TableBody, TableCell, TableHead, TableRow, Box, Divider, Chip, Tooltip, } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
-import { loadInitialData } from "./LoaderData";
-import { useWS } from "context";
+import { useSelector } from "react-redux";
 
 const selectDevices = (state: ReduxState): Device[] => state.devices;
 const selectOidRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
 
-export const MainPage = () => {
-  const [loading, setLoading] = useState<boolean>(true);
-
-  const dispatch = useDispatch();
+export const DevicePage = () => {  
   const devices: Device[] = useSelector(selectDevices);
   const records: OidRecord[] = useSelector(selectOidRecords);
-
-  const { addHandler } = useWS();
   
-  useEffect(() => {
-    loadInitialData(dispatch)
-      .finally(() => setLoading(false));
-  }, [dispatch]);
-
-  useEffect(() => {
-    const rmUpdateRecords = addHandler(WSEvent.UpdateRecords, (data) => {
-      dispatch(OidRecordsModule.addAction(data as OidRecord[]));
-    });
-
-    const rmRemoveRecords = addHandler(WSEvent.RemoveRecords, (data) => {
-      dispatch(OidRecordsModule.removeAction(data as OidRecordID[]));
-    });
-
-    const rmUpdateDevice = addHandler(WSEvent.UpdateDevice, (data) => {
-      dispatch(DevicesModule.addAction(data as Device));
-    });
-
-    const rmRemoveDevice = addHandler(WSEvent.RemoveDevice, (data) => {
-      dispatch(DevicesModule.removeAction(data as number));
-    });
-
-    return () => {
-      rmUpdateRecords();
-      rmRemoveRecords();
-      rmUpdateDevice();
-      rmRemoveDevice();
-    };
-  }, [addHandler]);
-
   const getRecordForOid = (deviceId: number, oid: string): OidRecord | undefined => {
     return records.find((record) => record.deviceId === deviceId && record.oid === oid);
   };
-
-  if (loading) return <p>Cargando dispositivos...</p>
 
   if (devices.length === 0) return <Typography>No hay dispositivos configurados.</Typography>
 
