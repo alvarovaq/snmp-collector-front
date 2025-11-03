@@ -65,7 +65,7 @@ export const MainPage = () => {
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
       <SidebarComponent menuItems={appMenuItems} onNavigate={(page) => setCurrentPage(page)}/>
-      <Box sx={{ flewGrow: 1, p: 4 }}>
+      <Box sx={{ flewGrow: 1, p: 4, width: "100%" }}>
         {
           currentPage === Page.DASHBOARD ?
             (<DashboardPage />) :

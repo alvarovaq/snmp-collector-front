@@ -1,1 +1,1 @@
-export * from "./devices.page";
+export * from "./containers/devices.page";
