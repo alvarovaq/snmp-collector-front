@@ -17,16 +17,15 @@ export const DevicePage = () => {
   };
 
   const getStatus = (deviceId: number) : Status => {
-    const latestRecord = records.filter((r) => r.deviceId === deviceId).reduce((prev, current) => (current.date > prev.date ? current : prev));
-    if (latestRecord) {
-      if (latestRecord.value) {
-        return Status.Connected;
-      } else {
-        return Status.Disconnected;
-      }
-    } else {
+    const deviceRecords = records.filter((r) => r.deviceId === deviceId);
+    if (!deviceRecords.length)
       return Status.Disconnected;
-    }
+
+    const latestRecord = deviceRecords.reduce((prev, current) => (current.date > prev.date ? current : prev));
+    if (!latestRecord)
+      return Status.Disconnected;
+
+    return latestRecord.value ? Status.Connected : Status.Disconnected;
   };
 
   const items = devices.map((device) => {
