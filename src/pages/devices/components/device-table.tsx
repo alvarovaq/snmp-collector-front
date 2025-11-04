@@ -1,13 +1,7 @@
 import React, { useState, useMemo } from "react";
-import {
-  Box,
-  TextField,
-  IconButton,
-  Tooltip,
-  Button,
-  Chip,
-} from "@mui/material";
+import { Box, TextField, IconButton, Tooltip, Button, Chip, } from "@mui/material";
 import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
+import { esES } from "@mui/x-data-grid/locales";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
@@ -63,6 +57,8 @@ export const DeviceTableComponent = (props: DeviceTableComponentProps) => {
       field: "status",
       headerName: "Estado",
       flex: 1,
+      filterable: false,
+      sortable: false,
       renderCell: ({ row }) => {
         const statusMap: Record<Status, { label: string; color: any }> = {
           [Status.Connected]: { label: "Conectado", color: "success" },
@@ -80,12 +76,6 @@ export const DeviceTableComponent = (props: DeviceTableComponentProps) => {
           />
         );
       },
-    },
-    {
-      field: "oids",
-      headerName: "OIDs",
-      width: 120,
-      valueGetter: (_, row) => row.oids.length,
     },
     {
       field: "actions",
@@ -153,7 +143,13 @@ export const DeviceTableComponent = (props: DeviceTableComponentProps) => {
           sx={{
             cursor: "pointer",
             "& .MuiDataGrid-row:hover": { backgroundColor: "action.hover" },
+            "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
+              outline: "none",
+            },
           }}
+          localeText={esES.components.MuiDataGrid.defaultProps.localeText}
+          disableColumnResize
+          disableRowSelectionOnClick
         />
       </Box>
     </Box>
