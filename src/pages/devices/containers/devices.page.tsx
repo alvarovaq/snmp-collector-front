@@ -36,7 +36,7 @@ export const DevicePage = () => {
   });
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", width: "100%", pb: 4 }}>
       <Typography variant="h4" sx={{ mb: 4 }}>
         Dispositivos SNMP
       </Typography>
