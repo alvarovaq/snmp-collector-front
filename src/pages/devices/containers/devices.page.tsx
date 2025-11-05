@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { Device, OidRecord } from "models";
 import { ReduxState } from "store";
-import { DeviceTableComponent } from "../components";
+import { DeviceTableComponent, OidsDeviceComponent } from "../components";
 import { DeviceItem, Status } from "../models";
 import { Box, Typography, Paper } from "@mui/material";
 
@@ -9,11 +10,13 @@ const selectDevices = (state: ReduxState): Device[] => state.devices;
 const selectRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
 
 export const DevicePage = () => {
+  const [selectedDevice, setSelectedDevice] = useState<DeviceItem | null>(null);
+
   const devices: Device[] = useSelector(selectDevices);
   const records: OidRecord[] = useSelector(selectRecords);
   
   const onSelectDevice = (device: DeviceItem): void => {
-    console.log("Dispositivo pulsado: ", device.id);
+    setSelectedDevice(device);
   };
 
   const getStatus = (deviceId: number) : Status => {
@@ -41,6 +44,12 @@ export const DevicePage = () => {
       <Paper sx={{ p: 2, width: "100%" }}>
         <DeviceTableComponent devices={items} onSelectDevice={onSelectDevice} onCreate={() => {}} onUpdate={() => {}} onDelete={() => {}} />
       </Paper>
+
+      {selectedDevice && (
+        <Box sx={{ mt: 3 }}>
+          <OidsDeviceComponent device={selectedDevice} records={records} />
+        </Box>
+      )}
     </Box>
   );
 };
