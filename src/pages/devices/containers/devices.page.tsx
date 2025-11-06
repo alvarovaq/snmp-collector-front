@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { Device, OidRecord } from "models";
 import { ReduxState } from "store";
-import { DeviceTableComponent, OidsDeviceComponent } from "../components";
+import { DeviceTableComponent, OidsDeviceComponent, DeviceDialog } from "../components";
 import { DeviceItem, Status } from "../models";
 import { Box, Typography, Paper } from "@mui/material";
 
@@ -11,6 +11,7 @@ const selectRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
 
 export const DevicePage = () => {
   const [selectedDevice, setSelectedDevice] = useState<DeviceItem | null>(null);
+  const [openDeviceDlg, setOpenDeviceDlg] = useState<boolean>(false);
 
   const devices: Device[] = useSelector(selectDevices);
   const records: OidRecord[] = useSelector(selectRecords);
@@ -31,6 +32,14 @@ export const DevicePage = () => {
     return latestRecord.value ? Status.Connected : Status.Disconnected;
   };
 
+  const onCreateDevice = (): void => {
+    setOpenDeviceDlg(true);
+  };
+
+  const onCloseDeviceDlg = (): void => {
+    setOpenDeviceDlg(false);
+  };
+
   const items = devices.map((device) => {
     return { ...device, status: getStatus(device.id) };
   });
@@ -42,7 +51,7 @@ export const DevicePage = () => {
       </Typography>
 
       <Paper sx={{ p: 2, width: "100%" }}>
-        <DeviceTableComponent devices={items} onSelectDevice={onSelectDevice} onCreate={() => {}} onUpdate={() => {}} onDelete={() => {}} />
+        <DeviceTableComponent devices={items} onSelectDevice={onSelectDevice} onCreate={onCreateDevice} onUpdate={() => {}} onDelete={() => {}} />
       </Paper>
 
       {selectedDevice && (
@@ -50,6 +59,8 @@ export const DevicePage = () => {
           <OidsDeviceComponent device={selectedDevice} records={records} />
         </Box>
       )}
+
+      <DeviceDialog open={openDeviceDlg} onClose={onCloseDeviceDlg} onSave={() => {}}/>
     </Box>
   );
 };

@@ -1,10 +1,8 @@
 import { Box, Typography, Chip, Paper } from "@mui/material";
-import { DeviceItem } from "../models";
-import { OidRecord } from "models";
-import { SnmpObjType } from "models";
+import { Device, OidRecord, SnmpObjType } from "models";
 
 interface Props {
-  device: DeviceItem;
+  device: Device;
   records: OidRecord[];
 }
 
