@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Device, OidRecord } from "models";
 import { DevicesModule, ReduxState } from "store";
 import { DeviceTableComponent, OidsDeviceComponent, DeviceDialog } from "../components";
-import { DeviceItem, Status } from "../models";
+import { Status } from "../models";
 import { Box, Typography, Paper } from "@mui/material";
 import { DevicesClient } from "clients";
 
@@ -11,15 +11,25 @@ const selectDevices = (state: ReduxState): Device[] => state.devices;
 const selectRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
 
 export const DevicePage = () => {
-  const [selectedDevice, setSelectedDevice] = useState<DeviceItem | null>(null);
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
   const [openDeviceDlg, setOpenDeviceDlg] = useState<boolean>(false);
+  const [editDevice, setEditDevice] = useState<Device | null>(null);
 
   const devices: Device[] = useSelector(selectDevices);
   const records: OidRecord[] = useSelector(selectRecords);
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (selectedDevice) {
+      const device = devices.find((d) => d.id === selectedDevice.id);
+      if (device) {
+        setSelectedDevice(device);
+      }
+    }
+  }, [devices]);
   
-  const onSelectDevice = (device: DeviceItem): void => {
+  const onSelectDevice = (device: Device): void => {
     setSelectedDevice(device);
   };
 
@@ -36,6 +46,12 @@ export const DevicePage = () => {
   };
 
   const onCreateDevice = (): void => {
+    setEditDevice(null);
+    setOpenDeviceDlg(true);
+  };
+
+  const onEditDevice = (device: Device): void => {
+    setEditDevice(device);
     setOpenDeviceDlg(true);
   };
 
@@ -52,8 +68,21 @@ export const DevicePage = () => {
     }
   };
 
+  const updateDevice = async (device: Device): Promise<void> => {
+    try {
+      const updDevice = await DevicesClient.update(device);
+      dispatch(DevicesModule.addAction(updDevice));
+    } catch (error) {
+      console.error("Error al actualizar dispositivo", error);
+    }
+  };
+
   const onSaveDevice = (device: Device): void => {
-    addDevice(device);
+    if (!editDevice) {
+      addDevice(device);
+    } else {
+      updateDevice(device);
+    }
     setOpenDeviceDlg(false);
   };
 
@@ -68,7 +97,7 @@ export const DevicePage = () => {
       </Typography>
 
       <Paper sx={{ p: 2, width: "100%" }}>
-        <DeviceTableComponent devices={items} onSelectDevice={onSelectDevice} onCreate={onCreateDevice} onUpdate={() => {}} onDelete={() => {}} />
+        <DeviceTableComponent devices={items} onSelectDevice={onSelectDevice} onCreate={onCreateDevice} onUpdate={onEditDevice} onDelete={() => {}} />
       </Paper>
 
       {selectedDevice && (
@@ -77,7 +106,7 @@ export const DevicePage = () => {
         </Box>
       )}
 
-      <DeviceDialog open={openDeviceDlg} onClose={onCloseDeviceDlg} onSave={onSaveDevice}/>
+      <DeviceDialog open={openDeviceDlg} onClose={onCloseDeviceDlg} onSave={onSaveDevice} device={editDevice} />
     </Box>
   );
 };

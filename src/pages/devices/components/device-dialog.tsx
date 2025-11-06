@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 export interface DeviceDialogProps {
     open: boolean;
+    device: Device | null;
     onClose: () => void;
     onSave: (device: Device) => void;
 }
@@ -26,20 +27,35 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
 
     useEffect(() => {
         if (open) {
-            setName("");
-            setIp("");
-            setPort(161);
-            setVersion(SnmpVersion.Version2c);
-            setCommunity("public");
-            setContext("");
-            setUser("");
-            setLevel(SnmpV3SecurityLevel.NoAuthNoPriv);
-            setAuthProtocol(undefined);
-            setAuthKey("");
-            setPrivProtocol(undefined);
-            setPrivKey("");
+            if (!props.device) {
+                setName("");
+                setIp("");
+                setPort(161);
+                setVersion(SnmpVersion.Version2c);
+                setCommunity("public");
+                setContext("");
+                setUser("");
+                setLevel(SnmpV3SecurityLevel.NoAuthNoPriv);
+                setAuthProtocol(undefined);
+                setAuthKey("");
+                setPrivProtocol(undefined);
+                setPrivKey("");
+            } else {
+                setName(props.device.name);
+                setIp(props.device.config.ip);
+                setPort(props.device.config.port);
+                setVersion(props.device.config.version);
+                setCommunity(props.device.config.community || "");
+                setContext(props.device.config.context || "");
+                setUser(props.device.config.security?.user || "");
+                setLevel(props.device.config.security?.level || SnmpV3SecurityLevel.NoAuthNoPriv);
+                setAuthProtocol(props.device.config.security?.authProtocol);
+                setAuthKey(props.device.config.security?.authKey || "");
+                setPrivProtocol(props.device.config.security?.privProtocol);
+                setPrivKey(props.device.config.security?.privKey || "");
+            }
         }
-    }, [open]);
+    }, [open, props.device]);
 
     const isFormValid = (): boolean => {
         if (!name || !ip || !port) return false;
@@ -68,7 +84,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
         if (!isFormValid()) return;
 
         const device: Device = {
-            id: -1,
+            id: props.device ? props.device.id : -1,
             name,
             config: {
                 ip,
@@ -93,10 +109,10 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
 
     return (    
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-            <DialogTitle>{"Crear dispositivo"}</DialogTitle>
+            <DialogTitle>{ props.device ? "Editar dispositivo" : "Crear dispositivo"}</DialogTitle>
 
             <DialogContent dividers>
-                <Grid container spacing={2}>
+                <Grid container spacing={2} sx={{ mb: 2 }}>
                     <Grid size={12}>
                         <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: 'text.secondary' }}>
                             Detalles del dispositivo
@@ -265,7 +281,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
             <DialogActions>
                 <Button onClick={onClose}>Cancelar</Button>
                 <Button variant="contained" onClick={saveDevice} disabled={!isFormValid()}>
-                    {"Crear"}
+                    {"Guardar"}
                 </Button>
             </DialogActions>
         </Dialog>

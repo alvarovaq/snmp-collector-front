@@ -11,4 +11,9 @@ export class DevicesClient {
         const { data } = await api.post("/devices/add", device);
         return data;
     }
+
+    public static async update(device: Device): Promise<Device> {
+        const { data } = await api.post("/devices/update", device);
+        return data;
+    }
 };
