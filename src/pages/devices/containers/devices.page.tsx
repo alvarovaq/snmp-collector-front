@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Device, OidRecord } from "models";
-import { ReduxState } from "store";
+import { DevicesModule, ReduxState } from "store";
 import { DeviceTableComponent, OidsDeviceComponent, DeviceDialog } from "../components";
 import { DeviceItem, Status } from "../models";
 import { Box, Typography, Paper } from "@mui/material";
+import { DevicesClient } from "clients";
 
 const selectDevices = (state: ReduxState): Device[] => state.devices;
 const selectRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
@@ -15,6 +16,8 @@ export const DevicePage = () => {
 
   const devices: Device[] = useSelector(selectDevices);
   const records: OidRecord[] = useSelector(selectRecords);
+
+  const dispatch = useDispatch();
   
   const onSelectDevice = (device: DeviceItem): void => {
     setSelectedDevice(device);
@@ -40,6 +43,20 @@ export const DevicePage = () => {
     setOpenDeviceDlg(false);
   };
 
+  const addDevice = async (device: Device): Promise<void> => {
+    try {
+      const newDevice = await DevicesClient.add(device);
+      dispatch(DevicesModule.addAction(newDevice));
+    } catch (error) {
+      console.error("Error al crear dispositivo", error);
+    }
+  };
+
+  const onSaveDevice = (device: Device): void => {
+    addDevice(device);
+    setOpenDeviceDlg(false);
+  };
+
   const items = devices.map((device) => {
     return { ...device, status: getStatus(device.id) };
   });
@@ -60,7 +77,7 @@ export const DevicePage = () => {
         </Box>
       )}
 
-      <DeviceDialog open={openDeviceDlg} onClose={onCloseDeviceDlg} onSave={() => {}}/>
+      <DeviceDialog open={openDeviceDlg} onClose={onCloseDeviceDlg} onSave={onSaveDevice}/>
     </Box>
   );
 };

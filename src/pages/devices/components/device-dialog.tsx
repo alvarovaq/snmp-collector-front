@@ -1,11 +1,11 @@
 import { Dialog, DialogTitle, TextField, DialogContent, DialogActions, Button, MenuItem, Grid, Typography, Divider, } from '@mui/material';
-import { SnmpVersion, SnmpV3AuthProtocol, SnmpV3PrivProtocol, SnmpV3SecurityLevel } from 'models';
-import { useState } from 'react';
+import { SnmpVersion, SnmpV3AuthProtocol, SnmpV3PrivProtocol, SnmpV3SecurityLevel, Device } from 'models';
+import { useEffect, useState } from 'react';
 
 export interface DeviceDialogProps {
     open: boolean;
     onClose: () => void;
-    onSave: () => void;
+    onSave: (device: Device) => void;
 }
 
 export const DeviceDialog = (props: DeviceDialogProps) => {
@@ -23,6 +23,73 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
     const [authKey, setAuthKey] = useState("");
     const [privProtocol, setPrivProtocol] = useState<SnmpV3PrivProtocol | undefined>(undefined);
     const [privKey, setPrivKey] = useState("");
+
+    useEffect(() => {
+        if (open) {
+            setName("");
+            setIp("");
+            setPort(161);
+            setVersion(SnmpVersion.Version2c);
+            setCommunity("public");
+            setContext("");
+            setUser("");
+            setLevel(SnmpV3SecurityLevel.NoAuthNoPriv);
+            setAuthProtocol(undefined);
+            setAuthKey("");
+            setPrivProtocol(undefined);
+            setPrivKey("");
+        }
+    }, [open]);
+
+    const isFormValid = (): boolean => {
+        if (!name || !ip || !port) return false;
+
+        if (version === SnmpVersion.Version2c) {
+            return !!community;
+        }
+
+        if (version === SnmpVersion.Version3) {
+            if (!user) return false;
+
+            if (level === SnmpV3SecurityLevel.AuthNoPriv ||
+                level === SnmpV3SecurityLevel.AuthPriv) {
+                if (!authProtocol || !authKey) return false;
+            }
+
+            if (level === SnmpV3SecurityLevel.AuthPriv) {
+                if (!privProtocol || !privKey) return false;
+            }
+        }
+
+        return true;
+    };
+
+    const saveDevice = (): void => {
+        if (!isFormValid()) return;
+
+        const device: Device = {
+            id: -1,
+            name,
+            config: {
+                ip,
+                port,
+                version,
+                community: version === SnmpVersion.Version2c ? community : undefined,
+                context: version === SnmpVersion.Version3 ? context : undefined,
+                security: version === SnmpVersion.Version3 ? {
+                    user,
+                    level,
+                    authProtocol,
+                    authKey,
+                    privProtocol,
+                    privKey,
+                } : undefined,
+            },
+            oids: [],
+        };
+
+        onSave(device);
+    };
 
     return (    
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
@@ -197,7 +264,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
 
             <DialogActions>
                 <Button onClick={onClose}>Cancelar</Button>
-                <Button variant="contained" onClick={onSave}>
+                <Button variant="contained" onClick={saveDevice} disabled={!isFormValid()}>
                     {"Crear"}
                 </Button>
             </DialogActions>
