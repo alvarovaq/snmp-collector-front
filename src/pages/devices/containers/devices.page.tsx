@@ -6,6 +6,7 @@ import { DeviceTableComponent, OidsDeviceComponent, DeviceDialog, RmDeviceDialog
 import { Status } from "../models";
 import { Box, Typography, Paper } from "@mui/material";
 import { DevicesClient } from "clients";
+import { useNotification } from "context";
 
 const selectDevices = (state: ReduxState): Device[] => state.devices;
 const selectRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
@@ -19,6 +20,8 @@ export const DevicePage = () => {
 
   const devices: Device[] = useSelector(selectDevices);
   const records: OidRecord[] = useSelector(selectRecords);
+
+  const { notify } = useNotification();
 
   const dispatch = useDispatch();
 
@@ -67,7 +70,9 @@ export const DevicePage = () => {
     try {
       const newDevice = await DevicesClient.add(device);
       dispatch(DevicesModule.addAction(newDevice));
+      notify("Dispositivo creado correctamente", "success");
     } catch (error) {
+      notify("Error al crear el dispositivo", "error");
       console.error("Error al crear dispositivo", error);
     }
   };
@@ -76,7 +81,9 @@ export const DevicePage = () => {
     try {
       const updDevice = await DevicesClient.update(device);
       dispatch(DevicesModule.addAction(updDevice));
+      notify("Dispositivo actualizado correctamente", "success");
     } catch (error) {
+      notify("Error al actualizar el dispositivo", "error");
       console.error("Error al actualizar dispositivo", error);
     }
   };
@@ -84,7 +91,9 @@ export const DevicePage = () => {
   const removeDevice = async (deviceId: number): Promise<void> => {
     try {
       await DevicesClient.remove(deviceId);
+      notify("Dispositivo eliminado correctamente", "success");
     } catch (error) {
+      notify("Error al eliminar el dispositivo", "error");
       console.error("Error al eliminar dispositivo", error);
     }
   };
