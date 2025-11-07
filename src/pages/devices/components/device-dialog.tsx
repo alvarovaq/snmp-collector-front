@@ -1,6 +1,8 @@
-import { Dialog, DialogTitle, TextField, DialogContent, DialogActions, Button, MenuItem, Grid, Typography, Divider, } from '@mui/material';
-import { SnmpVersion, SnmpV3AuthProtocol, SnmpV3PrivProtocol, SnmpV3SecurityLevel, Device } from 'models';
+import { Dialog, DialogTitle, TextField, DialogContent, DialogActions, Button, MenuItem, Grid, Typography, Divider, IconButton, } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { SnmpVersion, SnmpV3AuthProtocol, SnmpV3PrivProtocol, SnmpV3SecurityLevel, Device, OidConfig, } from 'models';
 import { useEffect, useState } from 'react';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export interface DeviceDialogProps {
     open: boolean;
@@ -24,6 +26,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
     const [authKey, setAuthKey] = useState("");
     const [privProtocol, setPrivProtocol] = useState<SnmpV3PrivProtocol | undefined>(undefined);
     const [privKey, setPrivKey] = useState("");
+    const [oids, setOids] = useState<Array<OidConfig>>([]);
 
     useEffect(() => {
         if (open) {
@@ -40,6 +43,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
                 setAuthKey("");
                 setPrivProtocol(undefined);
                 setPrivKey("");
+                setOids([]);
             } else {
                 setName(props.device.name);
                 setIp(props.device.config.ip);
@@ -53,6 +57,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
                 setAuthKey(props.device.config.security?.authKey || "");
                 setPrivProtocol(props.device.config.security?.privProtocol);
                 setPrivKey(props.device.config.security?.privKey || "");
+                setOids(props.device.oids);
             }
         }
     }, [open, props.device]);
@@ -77,7 +82,25 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
             }
         }
 
+        if (oids.some((o) => o.frequency < 10)) return false;
+
         return true;
+    };
+
+    const addOid = (): void => {
+        setOids([...oids, { name: "", oid: "", frequency: 30 }]);
+    };
+
+    const updateOid = (index: number, field: string, value: any): void => {
+        const updated = [...oids];
+        updated[index] = { ...updated[index], [field]: value };
+        setOids(updated);
+    };
+
+    const removeOid = (index: number) => {
+        const updated = [...oids];
+        updated.splice(index, 1);
+        setOids(updated);
     };
 
     const saveDevice = (): void => {
@@ -101,7 +124,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
                     privKey,
                 } : undefined,
             },
-            oids: [],
+            oids: oids,
         };
 
         onSave(device);
@@ -275,6 +298,67 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
                             )}
                         </>
                     )}
+
+                    <Grid size={12}>
+                        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: 'text.secondary' }}>
+                            OIDs del dispositivo
+                        </Typography>
+                        <Divider />
+                    </Grid>
+
+                    <Grid container spacing={1} sx={{ width: "100%" }} >
+                        {oids.map((oidItem, index) => (
+                            <Grid key={index} container sx={{ width: "100%" }} >
+                                <Grid size={4}>
+                                    <TextField
+                                        label="Nombre"
+                                        value={oidItem.name}
+                                        onChange={(e) => updateOid(index, "name", e.target.value)}
+                                        fullWidth
+                                        required
+                                    />
+                                </Grid>
+
+                                <Grid size={4}>
+                                    <TextField
+                                        label="OID"
+                                        value={oidItem.oid}
+                                        onChange={(e) => updateOid(index, "oid", e.target.value)}
+                                        fullWidth
+                                        required
+                                    />
+                                </Grid>
+
+                                <Grid size={3}>
+                                    <TextField
+                                        label="Frecuencia (seg)"
+                                        type="number"
+                                        value={oidItem.frequency}
+                                        onChange={(e) =>
+                                            updateOid(index, "frequency", Number(e.target.value))
+                                        }
+                                        fullWidth
+                                        required
+                                        error={oidItem.frequency < 10}
+                                        helperText={oidItem.frequency < 10 ? "Mínimo 10 segundos" : ""}
+                                        inputProps={{min: 1}}
+                                    />
+                                </Grid>
+
+                                <Grid size={1} sx={{ display: "flex", alignItems: "center" }}>
+                                    <IconButton aria-label="delete" color="error" onClick={() => removeOid(index)}>
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </Grid>
+                            </Grid>
+                        ))}
+                    </Grid>
+
+                    <Grid size={12}>
+                        <Button variant="outlined" onClick={addOid} startIcon={<AddIcon />}>
+                            Agregar OID
+                        </Button>
+                    </Grid>
                 </Grid>
             </DialogContent>
 
