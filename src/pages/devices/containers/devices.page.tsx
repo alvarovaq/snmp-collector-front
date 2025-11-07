@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Device, OidRecord } from "models";
 import { DevicesModule, ReduxState } from "store";
-import { DeviceTableComponent, OidsDeviceComponent, DeviceDialog } from "../components";
+import { DeviceTableComponent, OidsDeviceComponent, DeviceDialog, RmDeviceDialog } from "../components";
 import { Status } from "../models";
 import { Box, Typography, Paper } from "@mui/material";
 import { DevicesClient } from "clients";
@@ -14,6 +14,8 @@ export const DevicePage = () => {
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
   const [openDeviceDlg, setOpenDeviceDlg] = useState<boolean>(false);
   const [editDevice, setEditDevice] = useState<Device | null>(null);
+  const [openRmDeviceDlg, setOpenRmDeviceDlg] = useState<boolean>(false);
+  const [rmDevice, setRmDevice] = useState<Device | null>(null);
 
   const devices: Device[] = useSelector(selectDevices);
   const records: OidRecord[] = useSelector(selectRecords);
@@ -25,6 +27,8 @@ export const DevicePage = () => {
       const device = devices.find((d) => d.id === selectedDevice.id);
       if (device) {
         setSelectedDevice(device);
+      } else {
+        setSelectedDevice(null);
       }
     }
   }, [devices]);
@@ -77,6 +81,14 @@ export const DevicePage = () => {
     }
   };
 
+  const removeDevice = async (deviceId: number): Promise<void> => {
+    try {
+      await DevicesClient.remove(deviceId);
+    } catch (error) {
+      console.error("Error al eliminar dispositivo", error);
+    }
+  };
+
   const onSaveDevice = (device: Device): void => {
     if (!editDevice) {
       addDevice(device);
@@ -84,6 +96,22 @@ export const DevicePage = () => {
       updateDevice(device);
     }
     setOpenDeviceDlg(false);
+  };
+
+  const onRemoveDevice = (device: Device): void => {
+    setRmDevice(device);
+    setOpenRmDeviceDlg(true);
+  };
+
+  const onCancelRmDevice = (): void => {
+    setOpenRmDeviceDlg(false);
+  };
+
+  const onConfirmRmDevice = (): void => {
+    if (rmDevice) {
+      removeDevice(rmDevice.id);
+    }
+    setOpenRmDeviceDlg(false);
   };
 
   const items = devices.map((device) => {
@@ -97,7 +125,7 @@ export const DevicePage = () => {
       </Typography>
 
       <Paper sx={{ p: 2, width: "100%" }}>
-        <DeviceTableComponent devices={items} onSelectDevice={onSelectDevice} onCreate={onCreateDevice} onUpdate={onEditDevice} onDelete={() => {}} />
+        <DeviceTableComponent devices={items} onSelectDevice={onSelectDevice} onCreate={onCreateDevice} onUpdate={onEditDevice} onDelete={onRemoveDevice} />
       </Paper>
 
       {selectedDevice && (
@@ -107,6 +135,7 @@ export const DevicePage = () => {
       )}
 
       <DeviceDialog open={openDeviceDlg} onClose={onCloseDeviceDlg} onSave={onSaveDevice} device={editDevice} />
+      <RmDeviceDialog open={openRmDeviceDlg} onCancel={onCancelRmDevice} onConfirm={onConfirmRmDevice} device={rmDevice?.name || "-"} />
     </Box>
   );
 };
