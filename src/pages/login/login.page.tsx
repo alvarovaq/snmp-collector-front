@@ -1,23 +1,75 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     Avatar,
     Box,
     Button,
-    CssBaseline,
     TextField,
     Typography,
     Paper,
     IconButton,
     InputAdornment,
     useTheme,
+    Alert,
+    CircularProgress,
 } from "@mui/material";
 import SensorsIcon from "@mui/icons-material/Sensors";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { Credentials } from "models";
+import { AuthClient } from "clients";
 
 export const LoginPage = () => {
-    const [showPassword, setShowPassword] = React.useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const theme = useTheme();
+
+    const verify = (credentials: Credentials): boolean => {
+        if (!credentials.email) {
+            setError("El email es requerido");
+            return false;
+        }
+
+        const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+        if (!emailRegex.test(credentials.email)) {
+            setError("Introduce un email válido");
+            return false;
+        }
+
+        if (!credentials.password) {
+            setError("La contraseña es requerida");
+            return false;
+        }
+
+        return true;
+    };
+
+    const login = (credentials: Credentials) => {
+        setLoading(true);
+        AuthClient.login(credentials)
+            .then((token: string) => {
+                console.log(token);
+            })
+            .catch((err) => {
+                setError("No se pudo iniciar sesión. Comprueba tu email y contraseña e inténtalo de nuevo");
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+
+        const credentials: Credentials = { email, password };
+
+        if (!verify(credentials)) return;
+
+        login(credentials);
+    };
 
     return (
         <Box
@@ -30,8 +82,6 @@ export const LoginPage = () => {
                 p: 2,
             }}
         >
-            <CssBaseline />
-
             <Paper
                 elevation={12}
                 sx={{
@@ -58,13 +108,21 @@ export const LoginPage = () => {
                     </Typography>
                 </Box>
 
-                <Box component="form" sx={{ mt: 4 }}>
+                <Box component="form" sx={{ mt: 4 }} onSubmit={handleSubmit}>
+                    {error && (
+                        <Alert severity="error" sx={{ mb: 2 }}>
+                            {error}
+                        </Alert>
+                    )}
+
                     <TextField
                         fullWidth
                         required
                         margin="normal"
                         label="Email"
                         variant="outlined"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         InputLabelProps={{ sx: { color: theme.palette.text.secondary } }}
                         InputProps={{ sx: { color: theme.palette.text.primary } }}
                     />
@@ -76,6 +134,8 @@ export const LoginPage = () => {
                         label="Contraseña"
                         type={showPassword ? "text" : "password"}
                         variant="outlined"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         InputLabelProps={{ sx: { color: theme.palette.text.secondary } }}
                         InputProps={{
                             sx: { color: theme.palette.text.primary },
@@ -104,11 +164,13 @@ export const LoginPage = () => {
                             letterSpacing: 0.5,
                             borderRadius: 2,
                         }}
+                        type="submit"
+                        disabled={loading}
                     >
-                        Entrar
+                        {loading ? <CircularProgress size={24} /> : "Entrar"}
                     </Button>
                 </Box>
             </Paper>
         </Box>
     );
-}
+};
