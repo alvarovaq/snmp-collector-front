@@ -1,10 +1,9 @@
 import { AxiosInstance } from "axios";
-import { ReduxState, store } from "store";
+import { authService } from "services";
 
 export const attachTokenInterceptor = (client: AxiosInstance) => {
     client.interceptors.request.use((config) => {
-        const state: ReduxState = store.getState();
-        const token = state.auth.token;
+        const token = authService.getToken();
         if (token) config.headers.Authorization = `Bearer ${token}`;
         return config;
     });

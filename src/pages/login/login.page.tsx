@@ -15,10 +15,9 @@ import {
 import SensorsIcon from "@mui/icons-material/Sensors";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { useDispatch } from "react-redux";
 import { Credentials } from "models";
 import { AuthClient } from "clients";
-import { AuthModule } from "store";
+import { authService } from "services";
 
 export const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -27,8 +26,6 @@ export const LoginPage = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const theme = useTheme();
-
-    const dispatch = useDispatch();
 
     const verify = (credentials: Credentials): boolean => {
         if (!credentials.email) {
@@ -54,7 +51,7 @@ export const LoginPage = () => {
         setLoading(true);
         AuthClient.login(credentials)
             .then((token: string) => {
-                dispatch(AuthModule.setTokenAction(token));
+                authService.login(token);
             })
             .catch((err) => {
                 setError("No se pudo iniciar sesión. Comprueba tu email y contraseña e inténtalo de nuevo");
