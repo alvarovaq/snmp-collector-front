@@ -1,4 +1,4 @@
-import api from "../config/axios.config";
+import api from "./api.client";
 import { Credentials } from "../models";
 
 export class AuthClient {
