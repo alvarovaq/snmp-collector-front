@@ -6,4 +6,9 @@ export class AuthClient {
         const { data } = await api.post("/auth/login", credentials);
         return data;
     }
+
+    public static async renew(): Promise<string> {
+        const { data } = await api.get("/auth/renew");
+        return data;
+    }
 };
