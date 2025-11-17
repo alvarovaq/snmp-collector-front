@@ -17,7 +17,7 @@ import { SidebarMenuItem, SidebarComponent, LoadingComponent } from "../componen
 import { Page } from "../models";
 import { User } from "models";
 import { authService } from "services";
-import { selectUser } from "store/selectors/auth";
+import { selectUser } from "store/selectors";
 
 const appMenuItems: SidebarMenuItem[] = [
   { text: 'Inicio', icon: <HomeIcon />, page: Page.DASHBOARD },

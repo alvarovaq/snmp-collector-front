@@ -7,7 +7,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import theme from 'theme/theme';
 import { useSelector } from 'react-redux';
 import { initServices } from 'services';
-import { selectToken } from 'store/selectors/auth';
+import { selectToken } from 'store/selectors';
 
 function App() {
   const token: string | null = useSelector(selectToken);

@@ -7,6 +7,7 @@ import { Status } from "../models";
 import { Box, Typography, Paper } from "@mui/material";
 import { DevicesClient } from "clients";
 import { useNotification } from "context";
+import { selectIsAdmin } from "store/selectors";
 
 const selectDevices = (state: ReduxState): Device[] => state.devices;
 const selectRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
@@ -24,6 +25,8 @@ export const DevicePage = () => {
   const { notify } = useNotification();
 
   const dispatch = useDispatch();
+
+  const isAdmin = useSelector(selectIsAdmin);
 
   useEffect(() => {
     if (selectedDevice) {
@@ -134,7 +137,7 @@ export const DevicePage = () => {
       </Typography>
 
       <Paper sx={{ p: 2, width: "100%" }}>
-        <DeviceTableComponent devices={items} onSelectDevice={onSelectDevice} onCreate={onCreateDevice} onUpdate={onEditDevice} onDelete={onRemoveDevice} />
+        <DeviceTableComponent devices={items} onSelectDevice={onSelectDevice} onCreate={onCreateDevice} onUpdate={onEditDevice} onDelete={onRemoveDevice} permission={isAdmin} />
       </Paper>
 
       {selectedDevice && (
