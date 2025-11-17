@@ -1,7 +1,7 @@
 import { configureStore, EnhancedStore, ReducersMapObject } from "@reduxjs/toolkit";
-import * as DevicesModule from "./Modules/devices";
-import * as OidRecordsModule from "./Modules/oid-records";
-import * as AuthModule from "./Modules/auth";
+import * as DevicesModule from "./modules/devices";
+import * as OidRecordsModule from "./modules/oid-records";
+import * as AuthModule from "./modules/auth";
 import { Device, OidRecord, AuthState } from "models";
 
 export { DevicesModule, OidRecordsModule, AuthModule };

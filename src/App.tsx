@@ -6,10 +6,8 @@ import env from "config/env.config";
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import theme from 'theme/theme';
 import { useSelector } from 'react-redux';
-import { ReduxState } from 'store';
 import { initServices } from 'services';
-
-const selectToken = (state: ReduxState): string | null => state.auth.token;
+import { selectToken } from 'store/selectors/auth';
 
 function App() {
   const token: string | null = useSelector(selectToken);

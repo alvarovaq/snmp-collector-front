@@ -15,11 +15,9 @@ import { SettingsPage } from "pages/settings";
 import { loadInitialData } from "../utils/LoaderData";
 import { SidebarMenuItem, SidebarComponent, LoadingComponent } from "../components";
 import { Page } from "../models";
-import { ReduxState } from "store";
 import { User } from "models";
 import { authService } from "services";
-
-const selectUser = (state: ReduxState): User | null => state.auth.user;
+import { selectUser } from "store/selectors/auth";
 
 const appMenuItems: SidebarMenuItem[] = [
   { text: 'Inicio', icon: <HomeIcon />, page: Page.DASHBOARD },
@@ -32,7 +30,7 @@ export const MainPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<Page>(Page.DASHBOARD);
   
-  const user = useSelector(selectUser);
+  const user: User | null = useSelector(selectUser);
 
   const dispatch = useDispatch();
   const { addHandler } = useWS();
