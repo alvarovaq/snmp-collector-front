@@ -1,5 +1,8 @@
+import { User } from "./users.model";
+
 export interface AuthState {
     token: string | null;
+    user: User | null;
 }
 
 export interface Credentials {

@@ -6,14 +6,13 @@ import env from "config/env.config";
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import theme from 'theme/theme';
 import { useSelector } from 'react-redux';
-import { AuthState } from "models";
 import { ReduxState } from 'store';
 import { initServices } from 'services';
 
-const selectAuth = (state: ReduxState): AuthState => state.auth;
+const selectToken = (state: ReduxState): string | null => state.auth.token;
 
 function App() {
-  const auth: AuthState = useSelector(selectAuth);
+  const token: string | null = useSelector(selectToken);
 
   useEffect(() => {
     initServices();
@@ -24,7 +23,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <NotificationProvider>
           <CssBaseline />
-          { auth.token ? <MainPage /> : <LoginPage /> }
+          { token ? <MainPage /> : <LoginPage /> }
         </NotificationProvider>
       </ThemeProvider>
     </WebSocketProvider>

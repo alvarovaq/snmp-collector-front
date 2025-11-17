@@ -1,7 +1,15 @@
+import { jwtDecode } from "jwt-decode";
 import { store, AuthModule } from "store";
 import { ReduxState } from '../store/index';
-import { AuthClient } from "clients";
+import { AuthClient, UsersClient } from "clients";
 import env from "config/env.config";
+import { User } from "models";
+
+interface PayloadData {
+    userId: number;
+    email: string;
+    role: string;
+}
 
 export class AuthService {
     private renewInterval: number | null = null;
@@ -17,6 +25,7 @@ export class AuthService {
     public login(token: string): void {
         this.setToken(token);
         this.startTokenRenewal();
+        this.setUser(token);
     }
 
     public logout(): void {
@@ -37,10 +46,22 @@ export class AuthService {
         AuthClient.renew()
             .then((token: string) => {
                 this.setToken(token);
+                this.setUser(token);
             })
             .catch((err) => {
                 console.error("Error al renovar token", err);
                 this.logout();
+            });
+    }
+
+    private setUser(token: string): void {
+        const payload = jwtDecode<PayloadData>(token);
+        UsersClient.get(payload.userId)
+            .then((user: User) => {
+                store.dispatch(AuthModule.setUserAction(user));
+            })
+            .catch((err) => {
+                console.error("Error al obtener usuario", err);
             });
     }
 
