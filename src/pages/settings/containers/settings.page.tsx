@@ -1,8 +1,8 @@
-// src/pages/settings/SettingsPage.tsx
-import React, { useState } from 'react';
-import { Box, List, ListItemButton, ListItemIcon, ListItemText, Typography, Divider, } from '@mui/material';
-import { Lock } from '@mui/icons-material';
-import { ChangePasswordForm } from './change-password-form';
+import React, { useState } from "react";
+import { Box, List, ListItemButton, ListItemIcon, ListItemText, Typography, Divider, } from "@mui/material";
+import { Lock, People } from "@mui/icons-material";
+import { ChangePasswordForm } from "./change-password-form";
+import { UsersPage } from "./users.page";
 
 interface SettingsSection {
   id: string;
@@ -13,11 +13,17 @@ interface SettingsSection {
 
 const settingsSections: SettingsSection[] = [
   {
-    id: 'change-password',
-    label: 'Cambiar contraseña',
+    id: "change-password",
+    label: "Cambiar contraseña",
     icon: <Lock />,
     component: <ChangePasswordForm />,
   },
+  {
+    id: "users",
+    label: "Usuarios",
+    icon: <People />,
+    component: <UsersPage />
+  }
 ];
 
 export const SettingsPage: React.FC = () => {
