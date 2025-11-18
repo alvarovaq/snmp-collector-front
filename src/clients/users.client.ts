@@ -6,4 +6,9 @@ export class UsersClient {
         const { data } = await api.get("/users/get?id=" + userId);
         return data;
     }
+
+    public static async getAll(): Promise<User[]> {
+        const { data } = await api.get("/users/getAll");
+        return data;
+    }
 };

@@ -5,7 +5,7 @@ import { esES } from "@mui/x-data-grid/locales";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
-import { User } from "models";
+import { Role, User } from "models";
 
 interface UsersTableComponentProps {
   users: User[];
@@ -29,6 +29,16 @@ export const UsersTableComponent = (props: UsersTableComponentProps) => {
     [props.users, search]
   );
 
+  const getRoleText = (role: Role): string => {
+    if (role === Role.ADMIN) {
+        return "Administrador";
+    } else if (role === Role.VIEWER) {
+        return "Visualizador";
+    } else {
+        return "";
+    }
+  };
+
   const columns: GridColDef<User>[] = [
     {
       field: "name",
@@ -45,7 +55,7 @@ export const UsersTableComponent = (props: UsersTableComponentProps) => {
       field: "role",
       headerName: "Rol",
       flex: 1,
-      valueGetter: (_, row) => row.role,
+      valueGetter: (_, row) => getRoleText(row.role),
     },
     {
       field: "actions",

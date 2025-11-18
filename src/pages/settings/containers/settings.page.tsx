@@ -32,8 +32,8 @@ export const SettingsPage: React.FC = () => {
   const currentSection = settingsSections.find((s) => s.id === selectedSection);
 
   return (
-    <Box sx={{ display: 'flex', height: '100%' }}>
-      <Box sx={{ width: 300, borderRight: 1, borderColor: 'divider' }}>
+    <Box sx={{ display: "flex", height: "100%" }}>
+      <Box sx={{ width: 300, borderRight: 1, borderColor: "divider" }}>
         <Typography variant="h5" sx={{ p: 2 }}>Configuración</Typography>
         <Divider />
         <List>
