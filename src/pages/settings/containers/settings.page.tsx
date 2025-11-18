@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Box, List, ListItemButton, ListItemIcon, ListItemText, Typography, Divider, } from '@mui/material';
 import { Lock } from '@mui/icons-material';
-import { ChangePasswordPage } from './change-password.page';
+import { ChangePasswordForm } from './change-password-form';
 
 interface SettingsSection {
   id: string;
@@ -16,7 +16,7 @@ const settingsSections: SettingsSection[] = [
     id: 'change-password',
     label: 'Cambiar contraseña',
     icon: <Lock />,
-    component: <ChangePasswordPage onChangePassword={(current, next) => console.log(current, next)} />,
+    component: <ChangePasswordForm />,
   },
 ];
 

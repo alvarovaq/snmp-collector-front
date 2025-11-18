@@ -9,3 +9,9 @@ export interface Credentials {
     email: string;
     password: string;
 }
+
+export interface ChangePasswordReq
+{
+    password: string;
+    newPassword: string;
+}
