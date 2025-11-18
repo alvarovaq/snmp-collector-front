@@ -9,6 +9,7 @@ import { DeviceItem, Status } from "../models";
 
 interface DeviceTableComponentProps {
   devices: DeviceItem[];
+  permission: boolean;
   onSelectDevice: (device: DeviceItem) => void;
   onCreate: () => void;
   onUpdate: (device: DeviceItem) => void;
@@ -86,12 +87,12 @@ export const DeviceTableComponent = (props: DeviceTableComponentProps) => {
       renderCell: (params) => (
         <>
           <Tooltip title="Editar">
-            <IconButton onClick={() => props.onUpdate(params.row)}>
+            <IconButton onClick={() => props.onUpdate(params.row)} disabled={!props.permission} >
               <EditIcon />
             </IconButton>
           </Tooltip>
           <Tooltip title="Eliminar">
-            <IconButton onClick={() => props.onDelete(params.row)}>
+            <IconButton onClick={() => props.onDelete(params.row)} disabled={!props.permission} >
               <DeleteIcon color="error" />
             </IconButton>
           </Tooltip>
@@ -124,6 +125,7 @@ export const DeviceTableComponent = (props: DeviceTableComponentProps) => {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={props.onCreate}
+          disabled={!props.permission}
         >
           Crear dispositivo
         </Button>

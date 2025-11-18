@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Box } from "@mui/material";
 import HomeIcon from '@mui/icons-material/Home';
 import DnsIcon from '@mui/icons-material/Dns';
@@ -15,6 +15,9 @@ import { SettingsPage } from "pages/settings";
 import { loadInitialData } from "../utils/LoaderData";
 import { SidebarMenuItem, SidebarComponent, LoadingComponent } from "../components";
 import { Page } from "../models";
+import { User } from "models";
+import { authService } from "services";
+import { selectUser } from "store/selectors";
 
 const appMenuItems: SidebarMenuItem[] = [
   { text: 'Inicio', icon: <HomeIcon />, page: Page.DASHBOARD },
@@ -27,6 +30,8 @@ export const MainPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<Page>(Page.DASHBOARD);
   
+  const user: User | null = useSelector(selectUser);
+
   const dispatch = useDispatch();
   const { addHandler } = useWS();
   
@@ -60,12 +65,16 @@ export const MainPage = () => {
     };
   }, [addHandler, dispatch]);
 
+  const onLogout = (): void => {
+    authService.logout();
+  };
+
   if (loading) return (<LoadingComponent />);
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
-      <SidebarComponent menuItems={appMenuItems} onNavigate={(page) => setCurrentPage(page)}/>
-      <Box sx={{ flewGrow: 1, p: 4, width: "100%" }}>
+      <SidebarComponent menuItems={appMenuItems} onNavigate={(page) => setCurrentPage(page)} user={user} onLogout={onLogout} />
+      <Box sx={{ flewGrow: 1, width: "100%" }}>
         {
           currentPage === Page.DASHBOARD ?
             (<DashboardPage />) :

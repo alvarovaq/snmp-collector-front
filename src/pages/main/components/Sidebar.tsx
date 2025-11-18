@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import Drawer from '@mui/material/Drawer';
-import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Divider, useTheme, SvgIconProps } from '@mui/material';
+import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Divider, useTheme, SvgIconProps, Avatar, Button, } from '@mui/material';
+import { Logout } from '@mui/icons-material';
 import { Page } from '../models';
+import { User } from "models"
 
 export interface SidebarMenuItem {
   text: string;
@@ -12,17 +14,19 @@ export interface SidebarMenuItem {
 interface SidebarComponentProps {
   menuItems: SidebarMenuItem[];
   onNavigate: (page: Page) => void;
+  user?: User | null;
+  onLogout: () => void;
 }
 
 const drawerWidth = 260;
 
-export const SidebarComponent = ({ menuItems, onNavigate }: SidebarComponentProps) => {
+export const SidebarComponent = (props: SidebarComponentProps) => {
   const theme = useTheme();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const handleListItemClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, item: SidebarMenuItem, index: number) => {
     setSelectedIndex(index);
-    onNavigate(item.page);
+    props.onNavigate(item.page);
   };
 
   return (
@@ -64,7 +68,7 @@ export const SidebarComponent = ({ menuItems, onNavigate }: SidebarComponentProp
         <Divider />
         <Box sx={{ flexGrow: 0, py: 1 }}>
           <List sx={{ p: 1 }}>
-            {menuItems.map((item, index) => (
+            {props.menuItems.map((item, index) => (
               <ListItem key={item.page} disablePadding sx={{ borderRadius: 1, mb: 0.5 }}>
                 <ListItemButton
                   selected={selectedIndex === index}
@@ -103,6 +107,27 @@ export const SidebarComponent = ({ menuItems, onNavigate }: SidebarComponentProp
           </List>
         </Box>
         <Box sx={{ flexGrow: 1 }} />
+        
+        <Box sx={{ p: 2, borderTop: theme.palette.mode === 'dark' ? '1px solid #333' : '1px solid #ddd' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Avatar sx={{ mr: 1 }}>
+              { props.user ? props.user.name.charAt(0).toUpperCase() : "-" }
+            </Avatar>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {props.user  ? props.user.name : "-"}
+            </Typography>
+          </Box>
+
+          <Button
+            variant="outlined"
+            color="error"
+            fullWidth
+            startIcon={<Logout />}
+            onClick={props.onLogout}
+          >
+            Cerrar sesión
+          </Button>
+        </Box>
       </Drawer>
     </Box>
   );

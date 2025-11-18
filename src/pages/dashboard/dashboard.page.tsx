@@ -17,7 +17,7 @@ export const DashboardPage = () => {
     if (devices.length === 0) return <Typography>No hay dispositivos configurados.</Typography>
 
     return (
-        <Grid container spacing={3}>
+        <Grid container spacing={3} sx={{p: 2}}>
             {devices.map((device) => (
                 <Grid key={device.id}>
                 <Card variant="outlined" sx={{ borderRadius: 2, boxShadow: 1 }}>

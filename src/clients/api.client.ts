@@ -1,5 +1,6 @@
 import axios from "axios";
-import env from "./env.config";
+import env from "config/env.config";
+import { attachInterceptors } from "./interceptors";
 
 const api = axios.create({
     baseURL: env.apiUrl,
@@ -8,5 +9,7 @@ const api = axios.create({
         "Content-Type": "application/json"
     }
 });
+
+attachInterceptors(api);
 
 export default api;
