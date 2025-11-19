@@ -21,4 +21,8 @@ export class UsersClient {
         const { data } = await api.post("users/update", user);
         return data;
     }
+
+    public static async remove(userId: number): Promise<void> {
+        await api.delete("users/remove?id=" + userId);
+    }
 };

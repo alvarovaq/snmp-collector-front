@@ -1,4 +1,4 @@
-import { Box, CircularProgress } from "@mui/material"
+import { Box, CircularProgress, Typography } from "@mui/material"
 import { UserDialog, UsersTableComponent } from "../components";
 import { useEffect, useState } from "react";
 import { User } from "models";
@@ -6,12 +6,15 @@ import { UsersClient } from "clients";
 import { useNotification } from "context";
 import { useSelector } from "react-redux";
 import { selectUser } from "store/selectors";
+import { ConfirmDlg } from "components";
 
 export const UsersPage = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [isOpenUserDlg, setIsOpenUserDlg] = useState<boolean>(false);
     const [userEdit, setUserEdit] = useState<User | null>(null);
+    const [isOpenUserRm, setIsOpenUserRm] = useState<boolean>(false);
+    const [userRm, setUserRm] = useState<User | null>(null);
 
     const user = useSelector(selectUser);
     const { notify } = useNotification();
@@ -44,6 +47,16 @@ export const UsersPage = () => {
         setIsOpenUserDlg(true);
     }
 
+    const closeUserRm = (): void => {
+        setUserRm(null);
+        setIsOpenUserRm(false);
+    }
+
+    const openUserRm = (user: User): void => {
+        setUserRm(user);
+        setIsOpenUserRm(true);
+    };
+
     const addUser = (user: User): void => {
         UsersClient.add(user)
             .then((u: User) => {
@@ -52,7 +65,7 @@ export const UsersPage = () => {
             })
             .catch((err) => {
                 console.error("Error al crear usuario", err);
-                notify("No se ha podido crear el usuario. Intentalo de nuevo");
+                notify("No se ha podido crear el usuario. Intentalo de nuevo", "error");
             });
     };
 
@@ -66,7 +79,21 @@ export const UsersPage = () => {
             })
             .catch((err) => {
                 console.error("Error al actualizar usuario", err);
-                notify("No se ha podido actualizar el usuario. Intentalo de nuevo");
+                notify("No se ha podido actualizar el usuario. Intentalo de nuevo", "error");
+            });
+    };
+
+    const removeUser = (user: User): void => {
+        UsersClient.remove(user.id)
+            .then(() => {
+                setUsers(users.filter((us: User) => {
+                    return us.id !== user.id;
+                }));
+                notify("Usuario eliminado correctamente", "success");
+            })
+            .catch((err) => {
+                console.error("Error al eliminar usuario", err);
+                notify("No se ha podido eliminar el usuario. Intentalo de nuevo", "error");
             });
     };
 
@@ -77,6 +104,12 @@ export const UsersPage = () => {
             addUser(user);
         setUserEdit(null);
         setIsOpenUserDlg(false);
+    };
+
+    const confirmUserRm = (): void => {
+        if (userRm)
+            removeUser(userRm);
+        closeUserRm();
     };
 
     if (loading) {
@@ -96,8 +129,18 @@ export const UsersPage = () => {
 
     return (
         <Box>
-            <UsersTableComponent myUser={user ? user.id : -1} users={users} onSelectUser={() => {}} onCreate={openNewUserDlg} onUpdate={openUserDlg} onDelete={() => {}} />
+            <UsersTableComponent myUser={user ? user.id : -1} users={users} onSelectUser={() => {}} onCreate={openNewUserDlg} onUpdate={openUserDlg} onDelete={openUserRm} />
+            
             <UserDialog open={isOpenUserDlg} user={userEdit} onSave={saveUser} onClose={closeUserDlg} />
+            <ConfirmDlg open={isOpenUserRm} title="Eliminar usuario" onConfirm={confirmUserRm} onCancel={closeUserRm} >
+                <Typography sx={{ mb: 2 }}>
+                    ¿Estás seguro de querer eliminar a{" "}
+                    <Typography component="span" color="secondary">
+                        { userRm ? userRm.name : "-" }
+                    </Typography>
+                    ?
+                </Typography>
+            </ConfirmDlg>
         </Box>
     );
 };
