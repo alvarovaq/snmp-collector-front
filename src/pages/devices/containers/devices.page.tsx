@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Device, OidRecord } from "models";
 import { DevicesModule, ReduxState } from "store";
-import { DeviceTableComponent, OidsDeviceComponent, DeviceDialog, RmDeviceDialog } from "../components";
+import { DeviceTableComponent, OidsDeviceComponent, DeviceDialog } from "../components";
 import { Status } from "../models";
 import { Box, Typography, Paper } from "@mui/material";
 import { DevicesClient } from "clients";
 import { useNotification } from "context";
 import { selectIsAdmin } from "store/selectors";
+import { ConfirmDlg } from "components";
 
 const selectDevices = (state: ReduxState): Device[] => state.devices;
 const selectRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
@@ -147,7 +148,15 @@ export const DevicePage = () => {
       )}
 
       <DeviceDialog open={openDeviceDlg} onClose={onCloseDeviceDlg} onSave={onSaveDevice} device={editDevice} />
-      <RmDeviceDialog open={openRmDeviceDlg} onCancel={onCancelRmDevice} onConfirm={onConfirmRmDevice} device={rmDevice?.name || "-"} />
+      <ConfirmDlg open={openRmDeviceDlg} title={"Eliminar dispositivo"} onCancel={onCancelRmDevice} onConfirm={onConfirmRmDevice} >
+        <Typography sx={{ mb: 2 }}>
+            ¿Estás seguro de querer eliminar el dispositivo{" "}
+            <Typography component="span" color="secondary">
+                {rmDevice?.name || "-"}
+            </Typography>
+            ?
+        </Typography>
+      </ConfirmDlg>
     </Box>
   );
 };
