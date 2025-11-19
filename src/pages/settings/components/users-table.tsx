@@ -8,6 +8,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { Role, User } from "models";
 
 interface UsersTableComponentProps {
+  myUser: number;
   users: User[];
   onSelectUser: (user: User) => void;
   onCreate: () => void;
@@ -66,12 +67,12 @@ export const UsersTableComponent = (props: UsersTableComponentProps) => {
       renderCell: (params) => (
         <>
           <Tooltip title="Editar">
-            <IconButton onClick={() => props.onUpdate(params.row)} >
+            <IconButton onClick={() => props.onUpdate(params.row)} disabled={params.row.id === props.myUser} >
               <EditIcon />
             </IconButton>
           </Tooltip>
           <Tooltip title="Eliminar">
-            <IconButton onClick={() => props.onDelete(params.row)} >
+            <IconButton onClick={() => props.onDelete(params.row)} disabled={params.row.id === props.myUser} >
               <DeleteIcon color="error" />
             </IconButton>
           </Tooltip>
@@ -81,7 +82,12 @@ export const UsersTableComponent = (props: UsersTableComponentProps) => {
   ];
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box sx={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column"
+    }}>
       
       <Box
         sx={{
@@ -105,11 +111,11 @@ export const UsersTableComponent = (props: UsersTableComponentProps) => {
           startIcon={<AddIcon />}
           onClick={props.onCreate}
         >
-          Crear dispositivo
+          Crear usuario
         </Button>
       </Box>
 
-      <Box sx={{ height: 500, width: "100%" }}>
+      <Box sx={{ flexGrow: 1 }}>
         <DataGrid<User>
           rows={filteredUsers}
           columns={columns}

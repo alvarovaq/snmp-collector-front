@@ -11,4 +11,14 @@ export class UsersClient {
         const { data } = await api.get("/users/getAll");
         return data;
     }
+
+    public static async add(user: User): Promise<User> {
+        const { data } = await api.post("users/add", user);
+        return data;
+    }
+
+    public static async update(user: User): Promise<User> {
+        const { data } = await api.post("users/update", user);
+        return data;
+    }
 };
