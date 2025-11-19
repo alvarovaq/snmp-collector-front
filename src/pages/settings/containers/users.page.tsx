@@ -48,7 +48,6 @@ export const UsersPage = () => {
     }
 
     const closeUserRm = (): void => {
-        setUserRm(null);
         setIsOpenUserRm(false);
     }
 

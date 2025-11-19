@@ -30,10 +30,15 @@ export const UserDialog = (props: UserDialogProps) => {
         }
     }, [open, props.user]);
 
+    const isEmail = (text: string) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(text);
+    };
+
     const isFormValid = (): boolean => {
         if (!name || !email || !role) return false;
 
-        return true;
+        return isEmail(email);
     };
 
     const saveUser = (): void => {
