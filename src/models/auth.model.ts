@@ -10,8 +10,17 @@ export interface Credentials {
     password: string;
 }
 
-export interface ChangePasswordReq
-{
+export interface ChangePasswordReq {
     password: string;
     newPassword: string;
+}
+
+export interface ResetPWDTokenReq {
+    url: string;
+    email: string;
+}
+
+export interface ResetPasswordReq {
+    token: string;
+    password: string;
 }

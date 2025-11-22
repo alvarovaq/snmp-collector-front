@@ -1,5 +1,5 @@
 import api from "./api.client";
-import { Credentials, ChangePasswordReq } from "models";
+import { Credentials, ChangePasswordReq, ResetPWDTokenReq, ResetPasswordReq } from "models";
 
 export class AuthClient {
     public static async login(credentials: Credentials): Promise<string> {
@@ -14,5 +14,13 @@ export class AuthClient {
 
     public static async changePassword(req: ChangePasswordReq): Promise<void> {
         await api.post("/auth/changePassword", req);
+    }
+
+    public static async resetPasswordToken(req: ResetPWDTokenReq): Promise<void> {
+        await api.post("/auth/resetPasswordToken", req);
+    }
+
+    public static async resetPassword(req: ResetPasswordReq): Promise<void> {
+        await api.post("/auth/resetPassword", req);
     }
 };
