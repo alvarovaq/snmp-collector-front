@@ -137,9 +137,7 @@ export const DevicePage = () => {
         Dispositivos SNMP
       </Typography>
 
-      <Paper sx={{ p: 2, width: "100%" }}>
-        <DeviceTableComponent devices={items} onSelectDevice={onSelectDevice} onCreate={onCreateDevice} onUpdate={onEditDevice} onDelete={onRemoveDevice} permission={isAdmin} />
-      </Paper>
+      <DeviceTableComponent devices={items} onSelectDevice={onSelectDevice} onCreate={onCreateDevice} onUpdate={onEditDevice} onDelete={onRemoveDevice} permission={isAdmin} />
 
       {selectedDevice && (
         <Box sx={{ mt: 3 }}>
