@@ -6,7 +6,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { Credentials } from "models";
 import { AuthClient } from "clients";
 import { authService } from "services";
-import { ResetPWDDialog } from "../components/reset-pwd-dialog";
+import { ResetPWDDialog } from "../components";
 
 export const LoginPage = () => {
     const [showPassword, setShowPassword] = useState<boolean>(false);

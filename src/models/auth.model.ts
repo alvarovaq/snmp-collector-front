@@ -19,3 +19,8 @@ export interface ResetPWDTokenReq {
     url: string;
     email: string;
 }
+
+export interface ResetPasswordReq {
+    token: string;
+    password: string;
+}
