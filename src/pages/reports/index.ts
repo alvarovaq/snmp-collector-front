@@ -1,1 +1,1 @@
-export * from "./reports.page";
+export * from "./containers/reports.page";
