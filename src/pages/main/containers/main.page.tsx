@@ -5,6 +5,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import DnsIcon from '@mui/icons-material/Dns';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
+import TimelineIcon from '@mui/icons-material/Timeline';
 import { Device, OidRecord, OidRecordID, WSEvent } from "models";
 import { DevicesModule, OidRecordsModule } from "store";
 import { useWS } from "context";
@@ -18,11 +19,13 @@ import { Page } from "../models";
 import { User } from "models";
 import { authService } from "services";
 import { selectUser } from "store/selectors";
+import { ReportsPage } from "pages/reports";
 
 const appMenuItems: SidebarMenuItem[] = [
   { text: 'Inicio', icon: <HomeIcon />, page: Page.DASHBOARD },
   { text: 'Dispositivos', icon: <DnsIcon />, page: Page.DEVICES },
   { text: 'Alertas', icon: <NotificationsIcon />, page: Page.ALERTS },
+  { text: 'Históricos', icon: <TimelineIcon />, page: Page.REPORTS },
   { text: 'Configuración', icon: <SettingsIcon />, page: Page.SETTINGS },
 ];
 
@@ -82,9 +85,11 @@ export const MainPage = () => {
               (<DevicePage />) :
               currentPage === Page.ALERTS ?
                 (<AlertsPage />) :
-                currentPage === Page.SETTINGS ?
-                  (<SettingsPage />) :
-                  (<p>Página no encontrada</p>)
+                currentPage === Page.REPORTS ?
+                  (<ReportsPage />) :
+                  currentPage === Page.SETTINGS ?
+                    (<SettingsPage />) :
+                    (<p>Página no encontrada</p>)
         }
       </Box>
     </Box>
