@@ -1,18 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { OidRecord, OidRecordsReq } from "models";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { Device, OidRecord, OidRecordsReq } from "models";
 import { OidRecordsClient } from "clients";
-import { GraphComponent } from "../components";
+import { GraphComponent, ReportFilterComponent } from "../components";
+import { ReduxState } from "store";
+import { ReportFilter } from "../models";
+import { useNotification } from "context";
+
+const selectDevices = (state: ReduxState): Device[] => state.devices;
 
 export const ReportsPage = () => {
     const [records, setRecords] = useState<OidRecord[]>([]);
+    const [start, setStart] = useState<Date>(new Date(2024, 11, 31, 22, 0, 0));
+    const [end, setEnd] = useState<Date>(new Date(2025, 0, 1, 2, 0, 0));
   
-    useEffect(() => {
-        const filter: OidRecordsReq = {
-            deviceId: 34,
-            oid: "1.1.1.1.1.1.1.1.1",
-            start: new Date(2025, 0, 1, 0, 0, 0),
-            end: new Date(2025, 0, 2, 0, 0, 0)
-        };  
+	const devices: Device[] = useSelector(selectDevices);
+
+    const { notify } = useNotification();
+
+    const getRecords = (deviceId: number, oid: string, start: Date, end: Date): void => {
+        const filter: OidRecordsReq = { deviceId, oid, start, end };  
         OidRecordsClient.find(filter)
         .then((data) => {
             setRecords(data);
@@ -20,9 +27,21 @@ export const ReportsPage = () => {
         .catch((error) => {
           console.log("Error al obtener el historico de registros", error);
         });
-    }, []);
+    };
+
+    const onSearch = (filter: ReportFilter): void => {
+        if (filter.deviceId === null || filter.oid === null) {
+            notify("Selecciona un OID", "error");
+            return;
+        }
+
+        getRecords(filter.deviceId, filter.oid, start, end);
+    };
     
     return (
-      <GraphComponent records={records} />
+        <div style={{ padding: "16px" }}>
+          	<ReportFilterComponent devices={devices} onSearch={onSearch} />
+			<GraphComponent records={records} start={start} end={end} />
+		</div>
     );
 };

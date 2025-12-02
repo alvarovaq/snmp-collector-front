@@ -4,17 +4,54 @@ import { OidRecord } from "models";
 
 export interface GraphComponentProps {
     records: OidRecord[],
+    start: Date,
+    end: Date,
 }
 
 export const GraphComponent = (props: GraphComponentProps) => {
+    console.log(props.start.toUTCString());
+    console.log(props.start.toString());
+
     const seriesData = useMemo(() => {
-        return props.records
-        .filter(r => r.value !== undefined && !isNaN(Number(r.value)))
-        .map(r => [
-            new Date(r.date).getTime(),
-            Number(r.value)
-        ])
-    }, [props.records]);
+        const filtered = props.records
+            .filter(r => r.value !== undefined && !isNaN(Number(r.value)))
+            .map(r => [
+                new Date(r.date).getTime(),
+                Number(r.value)
+            ] as [number, number | null]);
+
+        if (filtered.length === 0) {    
+            return [
+                [props.start.getTime(), null],
+                [props.end.getTime(), null]
+            ];
+        }
+        
+        if (filtered[0][0] > props.start.getTime()) {
+            filtered.unshift([props.start.getTime(), null]);
+        }
+        
+        const lastIndex = filtered.length - 1;
+        if (filtered[lastIndex][0] < props.end.getTime()) {
+            filtered.push([props.end.getTime(), null]);
+        }
+
+        return filtered;
+    }, [props.records, props.start, props.end]);
+
+    const formatXAxis = (value: string): string | string[] => {
+        const d = new Date(value);
+        const isMidnight = 
+            d.getHours() === 0 &&
+            d.getMinutes() === 0 &&
+            d.getSeconds() === 0;
+            
+        if (isMidnight) {
+            return d.toLocaleDateString();
+        }
+        
+        return d.toLocaleTimeString();
+    };
 
     const options: ApexCharts.ApexOptions = {
         chart: {
@@ -71,6 +108,9 @@ export const GraphComponent = (props: GraphComponentProps) => {
             },
             axisTicks: {
                 show: false
+            },
+            labels: {
+                formatter: formatXAxis
             }
         },
         yaxis: {
@@ -90,7 +130,10 @@ export const GraphComponent = (props: GraphComponentProps) => {
         },
         tooltip: {
             x: {
-                format: "dd MMM yyyy HH:mm:ss"
+                formatter: (value: number) => {
+                    const date = new Date(value);
+                    return date.toLocaleString();
+                }
             },
             theme: "dark",
         },
