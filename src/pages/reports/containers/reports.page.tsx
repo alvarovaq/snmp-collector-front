@@ -38,7 +38,7 @@ export const ReportsPage = () => {
         }
 
         const end = filter.date !== null ? filter.date : new Date();
-        const start = new Date(end.getTime() - 60 * 60 * 1000);
+        const start = new Date(end.getTime() - filter.range * 1000);
         getRecords(filter.deviceId, filter.oid, start, end);
     };
     

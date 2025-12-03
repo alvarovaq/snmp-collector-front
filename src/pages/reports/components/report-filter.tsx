@@ -3,6 +3,7 @@ import { Button, MenuItem, Stack, Select, InputLabel, FormControl } from "@mui/m
 import { Device, OidConfig } from "models";
 import { ReportFilter } from "../models";
 import { DateShiftPicker } from "./date-shift-picker";
+import { DurationPicker } from "./duration-picker";
 
 export interface ReportFilterComponentProps {
     devices: Device[];
@@ -13,12 +14,14 @@ export const ReportFilterComponent = (props: ReportFilterComponentProps) => {
     const [deviceId, setDeviceId] = useState<number | null>(null);
     const [oid, setOid] = useState<string | null>(null);
     const [date, setDate] = useState<Date | null>(null);
+    const [range, setRange] = useState<number>(15 * 60);
 
     const handleSearch = (): void => {
         const filter: ReportFilter = {
             deviceId,
             oid,
-            date
+            date,
+            range
         };
         props.onSearch(filter);
     };
@@ -67,7 +70,14 @@ export const ReportFilterComponent = (props: ReportFilterComponentProps) => {
             <DateShiftPicker
                 value={date}
                 onChange={setDate}
-                step={15 * 60 * 1000} // avanza/retrocede 15 minutos
+                step={range * 1000}
+                label="Fecha fin"
+            />
+
+            <DurationPicker
+                value={range}
+                onChange={setRange}
+                label="Rango"
             />
 
             <Button variant="contained" onClick={handleSearch}>

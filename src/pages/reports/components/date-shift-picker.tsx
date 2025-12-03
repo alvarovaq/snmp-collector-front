@@ -10,6 +10,7 @@ export interface DateShiftPickerProps {
   onChange: (value: Date | null) => void;
   step?: number;
   disabled?: boolean;
+  label?: string;
 }
 
 export const DateShiftPicker = (props: DateShiftPickerProps) => {
@@ -27,6 +28,7 @@ export const DateShiftPicker = (props: DateShiftPickerProps) => {
 
   return (
     <DateTimePicker
+      label={props.label}
       open={open}
       value={value}
       onChange={(newValue) => onChange(newValue as Date | null)}
