@@ -23,6 +23,8 @@ export const ReportsPage = () => {
         OidRecordsClient.find(filter)
         .then((data) => {
             setRecords(data);
+            setStart(start);
+            setEnd(end);
         })
         .catch((error) => {
           console.log("Error al obtener el historico de registros", error);
@@ -35,6 +37,8 @@ export const ReportsPage = () => {
             return;
         }
 
+        const end = filter.date !== null ? filter.date : new Date();
+        const start = new Date(end.getTime() - 60 * 60 * 1000);
         getRecords(filter.deviceId, filter.oid, start, end);
     };
     
