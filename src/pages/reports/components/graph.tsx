@@ -1,6 +1,8 @@
 import React, { useMemo } from "react";
 import Chart from "react-apexcharts";
 import { OidRecord } from "models";
+import { Point } from "../models";
+import { compressByInterval, calculateIntervalSeconds } from "../utils/graph";
 
 export interface GraphComponentProps {
     records: OidRecord[],
@@ -8,47 +10,13 @@ export interface GraphComponentProps {
     end: Date,
 }
 
-interface Point {
-    date: Date;
-    value: number | null;
-}
-
-function compressByInterval(points: Point[], intervalSeconds: number): Point[] {
-    if (points.length === 0) return [];
-
-    const intervalMs = intervalSeconds * 1000;
-    const sorted = [...points].sort((a, b) => a.date.getTime() - b.date.getTime());
-
-    const result: Point[] = [];
-    let currentIntervalStart = sorted[0].date.getTime();
-    result.push(sorted[0]);
-
-    for (const p of sorted) {
-        const t = p.date.getTime();
-        if (t - currentIntervalStart >= intervalMs) {
-            result.push(p);
-            currentIntervalStart = t;
-        }
-    }
-
-    return result;
-}
-
-function calculateIntervalSeconds(startDate: Date, endDate: Date, maxPoints: number): number {
-    const diffMs = endDate.getTime() - startDate.getTime();
-    if (diffMs <= 0) return 1;
-
-    const intervalSeconds = diffMs / 1000 / maxPoints;
-    
-    return Math.max(1, Math.floor(intervalSeconds));
-}
-
-
 export const GraphComponent = (props: GraphComponentProps) => {
     const seriesData = useMemo(() => {
+        const toPoint = (r: OidRecord): Point => ({ date: new Date(r.date), value: Number(r.value) } as Point)
+
         const filtered = compressByInterval(props.records
             .filter(r => r.value !== undefined && !isNaN(Number(r.value)))
-            .map(r => ({ date: new Date(r.date), value: Number(r.value) } as Point)), calculateIntervalSeconds(props.start, props.end, 750))
+            .map(toPoint), calculateIntervalSeconds(props.start, props.end, 750))
             .map(r => [r.date.getTime(), r.value] as [number, number | null]);
 
         if (filtered.length === 0) {    
@@ -63,8 +31,18 @@ export const GraphComponent = (props: GraphComponentProps) => {
         }
         
         const lastIndex = filtered.length - 1;
-        if (filtered[lastIndex][0] < props.end.getTime()) {
-            filtered.push([props.end.getTime(), null]);
+        const lastDataTime = filtered[lastIndex][0];
+        const lastDataValue = filtered[lastIndex][1];
+        const now = Date.now();
+        const endTime = props.end.getTime();
+        
+        if (lastDataTime < now && now < endTime) {
+            filtered.push([now, lastDataValue]);
+            filtered.push([endTime, null]);
+            return filtered;
+        } else if (lastDataTime < endTime && now >= endTime) {
+            filtered.push([endTime, lastDataValue]);
+            return filtered;
         }
 
         return filtered;
@@ -116,7 +94,7 @@ export const GraphComponent = (props: GraphComponentProps) => {
         },
         colors: ["#00E396"],
         stroke: {
-            curve: "smooth",
+            curve: "straight",
             width: 3
         },
         dataLabels: {
