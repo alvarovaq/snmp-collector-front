@@ -12,7 +12,7 @@ export interface GraphComponentProps {
 
 export const GraphComponent = (props: GraphComponentProps) => {
     const seriesData = useMemo(() => {
-        const toPoint = (r: OidRecord): Point => ({ date: new Date(r.date), value: Number(r.value) } as Point)
+        const toPoint = (r: OidRecord): Point => ({ date: r.date, value: Number(r.value) } as Point)
 
         const filtered = compressByInterval(props.records
             .filter(r => r.value !== undefined && !isNaN(Number(r.value)))

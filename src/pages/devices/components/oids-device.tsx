@@ -1,5 +1,6 @@
 import { Box, Typography, Chip, Paper } from "@mui/material";
 import { Device, OidRecord, SnmpObjType } from "models";
+import { getOidTypeColor } from "utils/oid-records";
 
 interface Props {
   device: Device;
@@ -15,33 +16,6 @@ export const OidsDeviceComponent = ({ device, records }: Props) => {
     return oidRecords.reduce((prev, curr) =>
       curr.date > prev.date ? curr : prev
     );
-  };
-
-  const getChipColor = (type: SnmpObjType): any => {
-    switch (type) {
-      case SnmpObjType.Integer:
-      case SnmpObjType.Counter:
-      case SnmpObjType.Gauge:
-      case SnmpObjType.Counter64:
-      case SnmpObjType.TimeTicks:
-        return "primary";
-      case SnmpObjType.OctetString:
-      case SnmpObjType.BitString:
-        return "info";
-      case SnmpObjType.Boolean:
-        return "success";
-      case SnmpObjType.IpAddress:
-        return "warning";
-      case SnmpObjType.OID:
-        return "secondary";
-      case SnmpObjType.NoSuchObject:
-      case SnmpObjType.NoSuchInstance:
-      case SnmpObjType.EndOfMibView:
-      case SnmpObjType.Error:
-        return "error";
-      default:
-        return "default";
-    }
   };
 
   return (
@@ -78,7 +52,7 @@ export const OidsDeviceComponent = ({ device, records }: Props) => {
           : latest?.value ?? "Sin datos";
 
         const type = latest?.type ?? SnmpObjType.Null;
-        const chipColor = getChipColor(type);
+        const chipColor = getOidTypeColor(type);
 
         return (
           <Box
@@ -124,9 +98,9 @@ export const OidsDeviceComponent = ({ device, records }: Props) => {
               <Box sx={{ display: "flex", justifyContent: "center", width: "fit-content" }}>
                 <Chip
                   label={type}
-                  color={chipColor}
                   sx={{
                     textTransform: "none",
+                    backgroundColor: chipColor
                   }}
                 />
               </Box>

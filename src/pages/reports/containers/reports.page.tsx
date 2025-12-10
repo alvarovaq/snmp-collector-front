@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { Device, OidRecord, OidRecordsReq } from "models";
 import { OidRecordsClient } from "clients";
-import { GraphComponent, ReportFilterComponent } from "../components";
+import { GraphComponent, ReportFilterComponent, RecordTableComponent } from "../components";
 import { ReduxState } from "store";
 import { ReportFilter } from "../models";
 import { useNotification } from "context";
@@ -24,6 +24,11 @@ export const ReportsPage = () => {
     const getRecords = (deviceId: number, oid: string, start: Date, end: Date): void => {
         const filter: OidRecordsReq = { deviceId, oid, start, end };  
         OidRecordsClient.find(filter)
+            .then((data) => {
+                return data.map(d => {
+                    return { ...d, date: new Date(d.date) };
+                });
+            })
             .then((data) => {
                 setRecords(data);
                 setStart(start);
@@ -87,18 +92,7 @@ export const ReportsPage = () => {
             {view === "graph" ? (
                 <GraphComponent records={records} start={start} end={end} />
             ) : (
-                <div style={{
-                    padding: "16px",
-                    border: "1px dashed #ccc",
-                    minHeight: "300px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#999",
-                    fontStyle: "italic"
-                }}>
-                    Tabla vacía
-                </div>
+                <RecordTableComponent records={records} />
             )}
         </div>
     );
