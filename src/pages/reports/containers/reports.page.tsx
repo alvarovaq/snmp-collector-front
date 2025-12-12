@@ -2,21 +2,19 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { Device, OidRecord, OidRecordsReq } from "models";
 import { OidRecordsClient } from "clients";
-import { GraphComponent, ReportFilterComponent, RecordTableComponent } from "../components";
+import { GraphComponent, ReportFilterComponent, RecordTableComponent, ViewReportButton } from "../components";
 import { ReduxState } from "store";
-import { ReportFilter } from "../models";
+import { ReportFilter, ViewReport } from "../models";
 import { useNotification } from "context";
-import { ToggleButton, ToggleButtonGroup, Box, Tooltip, Typography } from "@mui/material";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import TableChartIcon from "@mui/icons-material/TableChart";
+import { Box } from "@mui/material";
 
 const selectDevices = (state: ReduxState): Device[] => state.devices;
 
 export const ReportsPage = () => {
     const [records, setRecords] = useState<OidRecord[]>([]);
-    const [start, setStart] = useState<Date>(new Date(2024, 11, 31, 22, 0, 0));
-    const [end, setEnd] = useState<Date>(new Date(2025, 0, 1, 2, 0, 0));
-    const [view, setView] = useState<"graph" | "table">("graph");
+    const [start, setStart] = useState<Date>(new Date());
+    const [end, setEnd] = useState<Date>(new Date());
+    const [view, setView] = useState<ViewReport>(ViewReport.Table);
 
     const devices: Device[] = useSelector(selectDevices);
     const { notify } = useNotification();
@@ -50,50 +48,23 @@ export const ReportsPage = () => {
         getRecords(filter.deviceId, filter.oid, start, end);
     };
 
-    const handleViewChange = (_: React.MouseEvent<HTMLElement>, nextView: "graph" | "table" | null) => {
+    const handleViewChange = (_: React.MouseEvent<HTMLElement>, nextView: ViewReport | null) => {
         if (nextView !== null) setView(nextView);
     };
 
     return (
-        <div style={{ padding: "16px" }}>
+        <Box sx={{ padding: 2, display: "flex", flexDirection: "column", height: "100%" }}>
             <ReportFilterComponent devices={devices} onSearch={onSearch} />
 
-            <Box mb={2}>
-                <ToggleButtonGroup
-                    value={view}
-                    exclusive
-                    onChange={handleViewChange}
-                    size="small"
-                    sx={{
-                        mb: 2,
-                        "& .MuiToggleButton-root": {
-                            minWidth: 120,
-                            display: "flex",
-                            justifyContent: "center",
-                            gap: 0.5
-                        },
-                    }}
-                >
-                    <Tooltip title="Gráfica">
-                        <ToggleButton value="graph">
-                            <BarChartIcon sx={{ mr: 0.5 }} />
-                            <Typography variant="body2" >Gráfica</Typography>
-                        </ToggleButton>
-                    </Tooltip>
-                    <Tooltip title="Tabla">
-                        <ToggleButton value="table">
-                            <TableChartIcon sx={{ mr: 0.5 }} />
-                            <Typography variant="body2" >Tabla</Typography>
-                        </ToggleButton>
-                    </Tooltip>
-                </ToggleButtonGroup>
-            </Box>
+            <ViewReportButton view={view} handleViewChange={handleViewChange} />
 
-            {view === "graph" ? (
-                <GraphComponent records={records} start={start} end={end} />
-            ) : (
-                <RecordTableComponent records={records} />
-            )}
-        </div>
+            <Box sx={{ flex: 1, minHeight: 0 }}>
+                {view === ViewReport.Graph ? (
+                    <GraphComponent records={records} start={start} end={end} />
+                ) : (
+                    <RecordTableComponent records={records} />
+                )}
+            </Box>
+        </Box>
     );
 };

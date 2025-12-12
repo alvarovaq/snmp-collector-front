@@ -87,36 +87,35 @@ export const RecordTableComponent = (props: RecordTableComponentProps) => {
 	];
 
 	return (
-		<Box sx={{ width: "100%" }}>
-			<Box sx={{ height: 500, width: "100%" }}>
-				<DataGrid<OidRecord>
-					rows={filteredDevices}
-					columns={columns}
-					getRowId={(row) => `${row.date}`}
-					pageSizeOptions={[5, 10, 20]}
-					initialState={{
-						pagination: { paginationModel: { pageSize: 10, page: 0 } },
-					}}
-					sx={{
-						cursor: "pointer",
-						"& .MuiDataGrid-row:hover": { backgroundColor: "action.hover" },
-						"& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
-							outline: "none",
-						},
-					}}
-					localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-					disableColumnResize
-					disableRowSelectionOnClick
-					slots={{
-						footer: () => (
-							<CustomFooter
-								showOnlyChanges={showOnlyChanges}
-								onToggle={() => setShowOnlyChanges((v) => !v)}
-							/>
-						)
-					}}
-				/>
-			</Box>
+		<Box sx={{ flex: 1, height: "100%", width: "100%" }}>
+			<DataGrid<OidRecord>
+				rows={filteredDevices}
+				columns={columns}
+				getRowId={(row) => `${row.date}`}
+				pageSizeOptions={[5, 10, 20]}
+				initialState={{
+					pagination: { paginationModel: { pageSize: 10, page: 0 } },
+				}}
+				sx={{
+					cursor: "pointer",
+					"& .MuiDataGrid-row:hover": { backgroundColor: "action.hover" },
+					"& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
+						outline: "none",
+					},
+				}}
+				localeText={esES.components.MuiDataGrid.defaultProps.localeText}
+				disableColumnResize
+				disableRowSelectionOnClick
+				slots={{
+					footer: () => (
+						<CustomFooter
+							showOnlyChanges={showOnlyChanges}
+							onToggle={() => setShowOnlyChanges((v) => !v)}
+						/>
+					)
+				}}
+				autoPageSize
+			/>
 		</Box>
 	);
 }

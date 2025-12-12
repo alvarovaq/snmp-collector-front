@@ -168,7 +168,7 @@ export const GraphComponent = (props: GraphComponentProps) => {
             options={options}
             series={series}
             type="area"
-            height={300}
+            height="100%"
         />
     );
 };
