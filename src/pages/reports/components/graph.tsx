@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import Chart from "react-apexcharts";
 import { OidRecord } from "models";
 import { Point } from "../models";
-import { compressByInterval, calculateIntervalSeconds } from "../utils/graph";
+import { compressByInterval, calculateIntervalSeconds, filterChanges } from "../utils/graph";
 
 export interface GraphComponentProps {
     records: OidRecord[],
@@ -12,6 +12,33 @@ export interface GraphComponentProps {
 }
 
 export const GraphComponent = (props: GraphComponentProps) => {
+    const pointsError = useMemo(() => {
+        return filterChanges(props.records)
+            .filter(r => r.error)
+            .map(r => {
+                return {
+                    x: r.date.getTime(),
+                    y: 0,
+                    marker: {
+                        size: 8,
+                        fillColor: '#fff',
+                        strokeColor: '#FF4560',
+                        radius: 2,
+                        cssClass: 'apexcharts-custom-class'
+                    },
+                    label: {
+                        borderColor: '#FF4560',
+                        offsetY: 0,
+                        style: {
+                            color: '#fff',
+                            background: '#FF4560',
+                        },
+                        text: r.error,
+                    }
+                };
+            });
+    }, [props.records]);
+
     const seriesData = useMemo(() => {
         const toPoint = (r: OidRecord): Point => ({ date: r.date, value: Number(r.value) } as Point);
         const intervalSeconds = calculateIntervalSeconds(props.start, props.end, 750);
@@ -164,6 +191,9 @@ export const GraphComponent = (props: GraphComponentProps) => {
         fill: {
             type: "solid",
             opacity: 0.7
+        },
+        annotations: {
+            points: pointsError
         }
     };
 
