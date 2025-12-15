@@ -8,44 +8,55 @@ export interface GraphComponentProps {
     records: OidRecord[],
     start: Date,
     end: Date,
+    interval: number,
 }
 
 export const GraphComponent = (props: GraphComponentProps) => {
     const seriesData = useMemo(() => {
-        const toPoint = (r: OidRecord): Point => ({ date: r.date, value: Number(r.value) } as Point)
+        const toPoint = (r: OidRecord): Point => ({ date: r.date, value: Number(r.value) } as Point);
+        const intervalSeconds = calculateIntervalSeconds(props.start, props.end, 750);
+        const MAX_GAP_MS = Math.max(props.interval, intervalSeconds) * 1000 * 2;
 
-        const filtered = compressByInterval(props.records
+        const compressed = compressByInterval(props.records
             .filter(r => r.value !== undefined && !isNaN(Number(r.value)))
-            .map(toPoint), calculateIntervalSeconds(props.start, props.end, 750))
-            .map(r => [r.date.getTime(), r.value] as [number, number | null]);
+            .map(toPoint), intervalSeconds)
 
-        if (filtered.length === 0) {    
+        if (compressed.length === 0) {
             return [
                 [props.start.getTime(), null],
                 [props.end.getTime(), null]
             ];
         }
-        
-        if (filtered[0][0] > props.start.getTime()) {
-            filtered.unshift([props.start.getTime(), null]);
+
+        const result: [number, number | null][] = [];
+
+        for (let i = 0; i < compressed.length; i++) {
+            const current = compressed[i];
+            result.push([current.date.getTime(), current.value]);
+
+            const next = compressed[i + 1];
+            if (next) {
+                const gap = next.date.getTime() - current.date.getTime();
+
+                if (gap > MAX_GAP_MS) {
+                    result.push([
+                        current.date.getTime() + 1,
+                        null
+                    ]);
+                }
+            }
         }
         
-        const lastIndex = filtered.length - 1;
-        const lastDataTime = filtered[lastIndex][0];
-        const lastDataValue = filtered[lastIndex][1];
-        const now = Date.now();
-        const endTime = props.end.getTime();
+        if (result[0][0] > props.start.getTime()) {
+            result.unshift([props.start.getTime(), null]);
+        }
         
-        if (lastDataTime < now && now < endTime) {
-            filtered.push([now, lastDataValue]);
-            filtered.push([endTime, null]);
-            return filtered;
-        } else if (lastDataTime < endTime && now >= endTime) {
-            filtered.push([endTime, lastDataValue]);
-            return filtered;
+        const last = result[result.length - 1][0];
+        if (last < props.end.getTime()) {
+            result.push([props.end.getTime(), null]);
         }
 
-        return filtered;
+        return result;
     }, [props.records, props.start, props.end]);
 
     const formatXAxis = (value: string): string | string[] => {

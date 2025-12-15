@@ -15,14 +15,21 @@ export const ReportsPage = () => {
     const [records, setRecords] = useState<OidRecord[]>([]);
     const [start, setStart] = useState<Date>(new Date());
     const [end, setEnd] = useState<Date>(new Date());
+    const [interval, setInterval] = useState<number>(60);
     const [view, setView] = useState<ViewReport>(ViewReport.Table);
 
     const devices: Device[] = useSelector(selectDevices);
     const filters: ReportFilter = useSelector(selectReportFilter);
     const { notify } = useNotification();
 
+    const updateInterval = (deviceId: number, oid: string): void => {
+        const freq = devices.find(d => d.id === deviceId)?.oids.find(o => o.oid === oid)?.frequency;
+        if (freq)
+            setInterval(freq);
+    };
+
     const getRecords = (deviceId: number, oid: string, start: Date, end: Date): void => {
-        const filter: OidRecordsReq = { deviceId, oid, start, end };  
+        const filter: OidRecordsReq = { deviceId, oid, start, end };
         OidRecordsClient.find(filter)
             .then((data) => {
                 return data.map(d => {
@@ -33,6 +40,8 @@ export const ReportsPage = () => {
                 setRecords(data);
                 setStart(start);
                 setEnd(end);
+
+                updateInterval(deviceId, oid);
             })
             .catch((error) => {
                 console.log("Error al obtener el historico de registros", error);
@@ -47,6 +56,7 @@ export const ReportsPage = () => {
 
         const end = filter.date !== null ? filter.date : new Date();
         const start = new Date(end.getTime() - filter.range * 1000);
+
         getRecords(filter.deviceId, filter.oid, start, end);
     };
 
@@ -62,7 +72,7 @@ export const ReportsPage = () => {
 
             <Box sx={{ flex: 1, minHeight: 0 }}>
                 {view === ViewReport.Graph ? (
-                    <GraphComponent records={records} start={start} end={end} />
+                    <GraphComponent records={records} start={start} end={end} interval={interval} />
                 ) : (
                     <RecordTableComponent records={records} />
                 )}
