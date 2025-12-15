@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { Device, OidRecord, OidRecordsReq } from "models";
+import { ReportFilter, Device, OidRecord, OidRecordsReq } from "models";
 import { OidRecordsClient } from "clients";
 import { GraphComponent, ReportFilterComponent, RecordTableComponent, ViewReportButton } from "../components";
 import { ReduxState } from "store";
-import { ReportFilter, ViewReport } from "../models";
+import { ViewReport } from "../models";
 import { useNotification } from "context";
 import { Box } from "@mui/material";
 
 const selectDevices = (state: ReduxState): Device[] => state.devices;
+const selectReportFilter = (state: ReduxState): ReportFilter => state.reports;
 
 export const ReportsPage = () => {
     const [records, setRecords] = useState<OidRecord[]>([]);
@@ -17,6 +18,7 @@ export const ReportsPage = () => {
     const [view, setView] = useState<ViewReport>(ViewReport.Table);
 
     const devices: Device[] = useSelector(selectDevices);
+    const filters: ReportFilter = useSelector(selectReportFilter);
     const { notify } = useNotification();
 
     const getRecords = (deviceId: number, oid: string, start: Date, end: Date): void => {
@@ -54,7 +56,7 @@ export const ReportsPage = () => {
 
     return (
         <Box sx={{ padding: 2, display: "flex", flexDirection: "column", height: "100%" }}>
-            <ReportFilterComponent devices={devices} onSearch={onSearch} />
+            <ReportFilterComponent devices={devices} onSearch={onSearch} filters={filters} />
 
             <ViewReportButton view={view} handleViewChange={handleViewChange} />
 

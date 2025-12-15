@@ -7,7 +7,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import { Device, OidRecord, OidRecordID, WSEvent } from "models";
-import { DevicesModule, OidRecordsModule } from "store";
+import { AppModule, DevicesModule, OidRecordsModule, ReportsModule } from "store";
 import { useWS } from "context";
 import { DashboardPage } from "pages/dashboard";
 import { DevicePage } from "pages/devices";
@@ -15,10 +15,9 @@ import { AlertsPage } from "pages/alerts";
 import { SettingsPage } from "pages/settings";
 import { loadInitialData } from "../utils/LoaderData";
 import { SidebarMenuItem, SidebarComponent, LoadingComponent } from "../components";
-import { Page } from "../models";
-import { User } from "models";
+import { Page, User } from "models";
 import { authService } from "services";
-import { selectUser } from "store/selectors";
+import { selectPage, selectUser } from "store/selectors";
 import { ReportsPage } from "pages/reports";
 
 const appMenuItems: SidebarMenuItem[] = [
@@ -31,9 +30,9 @@ const appMenuItems: SidebarMenuItem[] = [
 
 export const MainPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [currentPage, setCurrentPage] = useState<Page>(Page.DASHBOARD);
   
   const user: User | null = useSelector(selectUser);
+  const page: Page = useSelector(selectPage);
 
   const dispatch = useDispatch();
   const { addHandler } = useWS();
@@ -72,22 +71,28 @@ export const MainPage = () => {
     authService.logout();
   };
 
+  const onNavigate = (page: Page): void => {
+    if (page === Page.REPORTS)
+      dispatch(ReportsModule.resetAction());
+    dispatch(AppModule.setPageAction(page));
+  };
+
   if (loading) return (<LoadingComponent />);
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
-      <SidebarComponent menuItems={appMenuItems} onNavigate={(page) => setCurrentPage(page)} user={user} onLogout={onLogout} />
+      <SidebarComponent menuItems={appMenuItems} page={page} onNavigate={onNavigate} user={user} onLogout={onLogout} />
       <Box sx={{ flewGrow: 1, width: "100%" }}>
         {
-          currentPage === Page.DASHBOARD ?
+          page === Page.DASHBOARD ?
             (<DashboardPage />) :
-            currentPage === Page.DEVICES ?
+            page === Page.DEVICES ?
               (<DevicePage />) :
-              currentPage === Page.ALERTS ?
+              page === Page.ALERTS ?
                 (<AlertsPage />) :
-                currentPage === Page.REPORTS ?
+                page === Page.REPORTS ?
                   (<ReportsPage />) :
-                  currentPage === Page.SETTINGS ?
+                  page === Page.SETTINGS ?
                     (<SettingsPage />) :
                     (<p>Página no encontrada</p>)
         }

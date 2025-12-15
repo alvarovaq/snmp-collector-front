@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, MenuItem, Stack, Select, InputLabel, FormControl } from "@mui/material";
-import { Device, OidConfig } from "models";
-import { ReportFilter } from "../models";
+import { ReportFilter, Device, OidConfig } from "models";
 import { DateShiftPicker } from "./date-shift-picker";
 import { DurationPicker } from "./duration-picker";
 
 export interface ReportFilterComponentProps {
     devices: Device[];
     onSearch: (filter: ReportFilter) => void;
+    filters: ReportFilter;
 }
 
 export const ReportFilterComponent = (props: ReportFilterComponentProps) => {
@@ -15,6 +15,18 @@ export const ReportFilterComponent = (props: ReportFilterComponentProps) => {
     const [oid, setOid] = useState<string | null>(null);
     const [date, setDate] = useState<Date | null>(null);
     const [range, setRange] = useState<number>(15 * 60);
+
+    const { filters } = props;
+
+    useEffect(() => {
+        setDeviceId(filters.deviceId);
+        setOid(filters.oid);
+        setDate(filters.date);
+        setRange(filters.range);
+
+        if (filters.deviceId !== null)
+            props.onSearch(filters);
+    }, [filters]);
 
     const handleSearch = (): void => {
         const filter: ReportFilter = {

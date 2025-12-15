@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Drawer from '@mui/material/Drawer';
 import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Divider, useTheme, SvgIconProps, Avatar, Button, } from '@mui/material';
 import { Logout } from '@mui/icons-material';
-import { Page } from '../models';
-import { User } from "models"
+import { Page, User } from "models"
 
 export interface SidebarMenuItem {
   text: string;
@@ -13,6 +12,7 @@ export interface SidebarMenuItem {
 
 interface SidebarComponentProps {
   menuItems: SidebarMenuItem[];
+  page: Page;
   onNavigate: (page: Page) => void;
   user?: User | null;
   onLogout: () => void;
@@ -22,10 +22,8 @@ const drawerWidth = 260;
 
 export const SidebarComponent = (props: SidebarComponentProps) => {
   const theme = useTheme();
-  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const handleListItemClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, item: SidebarMenuItem, index: number) => {
-    setSelectedIndex(index);
     props.onNavigate(item.page);
   };
 
@@ -71,7 +69,7 @@ export const SidebarComponent = (props: SidebarComponentProps) => {
             {props.menuItems.map((item, index) => (
               <ListItem key={item.page} disablePadding sx={{ borderRadius: 1, mb: 0.5 }}>
                 <ListItemButton
-                  selected={selectedIndex === index}
+                  selected={props.page === item.page}
                   onClick={(event) => handleListItemClick(event, item, index)}
                   sx={{
                     borderRadius: 1,
@@ -93,7 +91,7 @@ export const SidebarComponent = (props: SidebarComponentProps) => {
                   <ListItemIcon
                     sx={{
                       color:
-                        selectedIndex === index
+                        props.page === item.page
                           ? theme.palette.text.primary
                           : theme.palette.text.secondary,
                     }}

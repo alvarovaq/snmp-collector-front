@@ -5,3 +5,7 @@ export enum Page {
     REPORTS,
     SETTINGS
 }
+
+export interface AppState {
+    page: Page;
+}
