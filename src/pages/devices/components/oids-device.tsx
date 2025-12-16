@@ -1,5 +1,9 @@
-import { Box, Typography, Chip, Paper } from "@mui/material";
-import { Device, OidRecord, SnmpObjType } from "models";
+import { Box, Typography, Chip, Paper, IconButton, Tooltip, } from "@mui/material";
+import { Device, OidRecord, Page, ReportFilter, SnmpObjType } from "models";
+import { getOidTypeColor } from "utils/oid-records";
+import TimelineIcon from '@mui/icons-material/Timeline';
+import { useDispatch } from "react-redux";
+import { AppModule, ReportsModule } from "store";
 
 interface Props {
   device: Device;
@@ -8,6 +12,19 @@ interface Props {
 
 export const OidsDeviceComponent = ({ device, records }: Props) => {
 
+  const dispatch = useDispatch();
+
+  const navigateToReports = (deviceId: number, oid: string): void => {
+    const filters: ReportFilter = {
+      deviceId: deviceId,
+      oid: oid,
+      date: null,
+      range: 15 * 60
+    };
+    dispatch(ReportsModule.setAction(filters));
+    dispatch(AppModule.setPageAction(Page.REPORTS));
+  };
+
   const getLatestRecord = (oid: string): OidRecord | undefined => {
     const oidRecords = records.filter((r) => r.deviceId === device.id && r.oid === oid);
     if (!oidRecords.length) return undefined;
@@ -15,33 +32,6 @@ export const OidsDeviceComponent = ({ device, records }: Props) => {
     return oidRecords.reduce((prev, curr) =>
       curr.date > prev.date ? curr : prev
     );
-  };
-
-  const getChipColor = (type: SnmpObjType): any => {
-    switch (type) {
-      case SnmpObjType.Integer:
-      case SnmpObjType.Counter:
-      case SnmpObjType.Gauge:
-      case SnmpObjType.Counter64:
-      case SnmpObjType.TimeTicks:
-        return "primary";
-      case SnmpObjType.OctetString:
-      case SnmpObjType.BitString:
-        return "info";
-      case SnmpObjType.Boolean:
-        return "success";
-      case SnmpObjType.IpAddress:
-        return "warning";
-      case SnmpObjType.OID:
-        return "secondary";
-      case SnmpObjType.NoSuchObject:
-      case SnmpObjType.NoSuchInstance:
-      case SnmpObjType.EndOfMibView:
-      case SnmpObjType.Error:
-        return "error";
-      default:
-        return "default";
-    }
   };
 
   return (
@@ -67,7 +57,8 @@ export const OidsDeviceComponent = ({ device, records }: Props) => {
         <Typography sx={{ width: "25%" }}>Nombre</Typography>
         <Typography sx={{ width: "25%" }}>OID</Typography>
         <Typography sx={{ width: "25%", textAlign: "center" }}>Valor</Typography>
-        <Typography sx={{ width: "25%", textAlign: "right" }}>Tipo</Typography>
+        <Typography sx={{ width: "20%", textAlign: "center" }}>Tipo</Typography>
+        <Typography sx={{ width: "5%", textAlign: "right" }}></Typography>
       </Box>
       
       {device.oids.map((oid) => {
@@ -78,7 +69,7 @@ export const OidsDeviceComponent = ({ device, records }: Props) => {
           : latest?.value ?? "Sin datos";
 
         const type = latest?.type ?? SnmpObjType.Null;
-        const chipColor = getChipColor(type);
+        const chipColor = getOidTypeColor(type);
 
         return (
           <Box
@@ -114,22 +105,24 @@ export const OidsDeviceComponent = ({ device, records }: Props) => {
                 {value}
             </Typography>
             
-            <Box
-              sx={{
-                width: "25%",
-                display: "flex",
-                justifyContent: "flex-end",
-              }}
-            >
+            <Box sx={{ width: "20%", display: "flex", justifyContent: "center", }} >
               <Box sx={{ display: "flex", justifyContent: "center", width: "fit-content" }}>
                 <Chip
                   label={type}
-                  color={chipColor}
                   sx={{
                     textTransform: "none",
+                    backgroundColor: chipColor
                   }}
                 />
               </Box>
+            </Box>
+
+            <Box sx={{ width: "5%", display: "flex", justifyContent: "flex-end" }} >
+              <Tooltip title="Ver histórico">
+                <IconButton aria-label="Hitórico" onClick={() => navigateToReports(device.id, oid.oid)} >
+                  <TimelineIcon/>                
+                </IconButton>
+              </Tooltip>
             </Box>
           </Box>
         );
