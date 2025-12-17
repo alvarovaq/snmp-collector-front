@@ -88,7 +88,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
     };
 
     const addOid = (): void => {
-        setOids([...oids, { name: "", oid: "", frequency: 30 }]);
+        setOids([...oids, { name: "", oid: "", frequency: 30, rules: [] }]);
     };
 
     const updateOid = (index: number, field: string, value: any): void => {

@@ -21,13 +21,23 @@ export const devicesSlice: Slice<Device[]> = createSlice({
         remove: create.reducer<number>((state, action) => {
             return state.filter((d) => d.id !== action.payload);
         }),
+        removeRule: create.reducer<number>((state, action) => {
+            state.forEach(d => {
+                d.oids.forEach(o => {
+                    o.rules = o.rules.filter(r => r !== action.payload);
+                });
+            });
+
+            return state;
+        }),
     }),
 });
 
-const { set, add, remove } = devicesSlice.actions;
+const { set, add, remove, removeRule } = devicesSlice.actions;
 
 export const setAction = set as ActionCreatorWithPayload<Device[]>;
 export const addAction = add as ActionCreatorWithPayload<Device>;
 export const removeAction = remove as ActionCreatorWithPayload<number>;
+export const removeRuleAction = removeRule as ActionCreatorWithPayload<number>;
 
 export const reducer = devicesSlice.reducer;
