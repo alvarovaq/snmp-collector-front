@@ -6,16 +6,23 @@ import { RulesTableComponent, RuleDialog } from "../components";
 import { useState } from "react";
 import { useNotification } from "context";
 import { RulesClient } from "clients/rules.client";
+import { ConfirmDlg } from "components";
 
 const selectRules = (state: ReduxState): Rule[] => state.rules;
 
-interface RuleDlgStatus {
+interface RuleDlgState {
     open: boolean;
     rule: Rule | null; 
 }
 
+interface RmRuleState {
+    open: boolean;
+    rule: Rule | null;
+}
+
 export const AlertsPage = () => {
-    const [ruleDlgStatus, setRuleDlgStatus] = useState<RuleDlgStatus>({ open: false, rule: null });
+    const [ruleDlgState, setRuleDlgState] = useState<RuleDlgState>({ open: false, rule: null });
+    const [rmRuleState, setRmRuleState] = useState<RmRuleState>({ open: false, rule: null });
 
     const rules = useSelector(selectRules);
 
@@ -44,24 +51,48 @@ export const AlertsPage = () => {
         }
     };
 
+    const removeRule = async (ruleId: number): Promise<void> => {
+        try {
+            await RulesClient.remove(ruleId);
+            dispatch(RulesModule.removeAction(ruleId));
+            notify("Regla eliminada correctamente", "success");
+        } catch (error) {
+            notify("Error al eliminar la regla", "error");
+            console.error("Error al eliminar regla", error);
+        }
+    };
+
+    const onAddRule = (): void => {
+        setRuleDlgState({ open: true, rule: null });
+    };
+
+    const onEditRule = (rule: Rule): void => {
+        setRuleDlgState({ open: true, rule: rule });
+    };
+
+    const onRemoveRule = (rule: Rule): void => {
+        setRmRuleState({ open: true, rule: rule });
+    };
+
     const onSaveRuleDialog = (rule: Rule): void => {
         if (rule.id !== -1)
             editRule(rule);
         else
             addRule(rule);
-        setRuleDlgStatus({ ...ruleDlgStatus, open: false });
+        setRuleDlgState({ ...ruleDlgState, open: false });
     };
 
     const onCloseRuleDialog = (): void => {
-        setRuleDlgStatus({ ...ruleDlgStatus, open: false });
+        setRuleDlgState({ ...ruleDlgState, open: false });
     };
 
-    const onAddRule = (): void => {
-        setRuleDlgStatus({ open: true, rule: null });
+    const onConfirmRmRule = (): void => {
+        removeRule(rmRuleState.rule?.id || -1);
+        setRmRuleState({ ...rmRuleState, open: false });
     };
 
-    const onEditRule = (rule: Rule): void => {
-        setRuleDlgStatus({ open: true, rule: rule });
+    const onCloseRmRule = (): void => {
+        setRmRuleState({ ...rmRuleState, open: false });
     };
     
     return (
@@ -70,9 +101,18 @@ export const AlertsPage = () => {
                 Reglas
             </Typography>
 
-            <RulesTableComponent rules={rules} permission={true} onSelectRule={(rule: Rule) => {}} onCreate={onAddRule} onUpdate={onEditRule} onDelete={(rule: Rule) => {}} />
+            <RulesTableComponent rules={rules} permission={true} onSelectRule={(rule: Rule) => {}} onCreate={onAddRule} onUpdate={onEditRule} onDelete={onRemoveRule} />
 
-            <RuleDialog open={ruleDlgStatus.open} onSave={onSaveRuleDialog} onClose={onCloseRuleDialog} rule={ruleDlgStatus.rule} />
+            <RuleDialog open={ruleDlgState.open} onSave={onSaveRuleDialog} onClose={onCloseRuleDialog} rule={ruleDlgState.rule} />
+            <ConfirmDlg open={rmRuleState.open} title={"Eliminar regla"} onCancel={onCloseRmRule} onConfirm={onConfirmRmRule} >
+                <Typography sx={{ mb: 2 }}>
+                    ¿Estás seguro de querer eliminar la regla{" "}
+                    <Typography component="span" color="secondary">
+                        {rmRuleState.rule?.name || "-"}
+                    </Typography>
+                    ?
+                </Typography>
+            </ConfirmDlg>
         </Box>
     );
 };
