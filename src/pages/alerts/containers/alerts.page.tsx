@@ -9,8 +9,13 @@ import { RulesClient } from "clients/rules.client";
 
 const selectRules = (state: ReduxState): Rule[] => state.rules;
 
+interface RuleDlgStatus {
+    open: boolean;
+    rule: Rule | null; 
+}
+
 export const AlertsPage = () => {
-    const [openRuleDialog, setOpenRuleDialog] = useState<boolean>(false);
+    const [ruleDlgStatus, setRuleDlgStatus] = useState<RuleDlgStatus>({ open: false, rule: null });
 
     const rules = useSelector(selectRules);
 
@@ -28,9 +33,35 @@ export const AlertsPage = () => {
         }
     };
 
-    const onSaveRuleDialog = (rule: Rule) => {
-        addRule(rule);
-        setOpenRuleDialog(false);
+    const editRule = async (rule: Rule): Promise<void> => {
+        try {
+            const updRule = await RulesClient.update(rule);
+            dispatch(RulesModule.addAction(updRule));
+            notify("Regla editada correctamente", "success");
+        } catch (error) {
+            notify("Error al editar la regla", "error");
+            console.error("Error al editar regla", error);
+        }
+    };
+
+    const onSaveRuleDialog = (rule: Rule): void => {
+        if (rule.id !== -1)
+            editRule(rule);
+        else
+            addRule(rule);
+        setRuleDlgStatus({ ...ruleDlgStatus, open: false });
+    };
+
+    const onCloseRuleDialog = (): void => {
+        setRuleDlgStatus({ ...ruleDlgStatus, open: false });
+    };
+
+    const onAddRule = (): void => {
+        setRuleDlgStatus({ open: true, rule: null });
+    };
+
+    const onEditRule = (rule: Rule): void => {
+        setRuleDlgStatus({ open: true, rule: rule });
     };
     
     return (
@@ -39,9 +70,9 @@ export const AlertsPage = () => {
                 Reglas
             </Typography>
 
-            <RulesTableComponent rules={rules} permission={true} onSelectRule={(rule: Rule) => {}} onCreate={() => { setOpenRuleDialog(true); }} onUpdate={(rule: Rule) => {}} onDelete={(rule: Rule) => {}} />
+            <RulesTableComponent rules={rules} permission={true} onSelectRule={(rule: Rule) => {}} onCreate={onAddRule} onUpdate={onEditRule} onDelete={(rule: Rule) => {}} />
 
-            <RuleDialog open={openRuleDialog} onSave={onSaveRuleDialog} onClose={() => { setOpenRuleDialog(false); }} />
+            <RuleDialog open={ruleDlgStatus.open} onSave={onSaveRuleDialog} onClose={onCloseRuleDialog} rule={ruleDlgStatus.rule} />
         </Box>
     );
 };

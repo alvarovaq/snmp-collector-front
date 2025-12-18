@@ -7,6 +7,7 @@ interface RuleDialogProps {
     open: boolean;
     onClose: () => void;
     onSave: (rule: Rule) => void;
+    rule: Rule | null;
 }
 
 export const RuleDialog = (props: RuleDialogProps) => {
@@ -17,10 +18,17 @@ export const RuleDialog = (props: RuleDialogProps) => {
 
     useEffect(() => {
         if (props.open) {
-            setName("");
-            setSeverity(Severity.INFO);
-            setOperator(Operator.EQUAL);
-            setThreshold("");
+            if (props.rule !== null) {
+                setName(props.rule.name);
+                setSeverity(props.rule.severity);
+                setOperator(props.rule.operator);
+                setThreshold(props.rule.threshold);
+            } else {
+                setName("");
+                setSeverity(Severity.INFO);
+                setOperator(Operator.EQUAL);
+                setThreshold("");
+            }
         }
     }, [props.open]);
 
@@ -36,7 +44,7 @@ export const RuleDialog = (props: RuleDialogProps) => {
 
     const save = () => {
         const rule: Rule = {
-            id: -1,
+            id: props.rule !== null ? props.rule.id : -1,
             name: name,
             operator: operator,
             severity: severity,
@@ -51,7 +59,7 @@ export const RuleDialog = (props: RuleDialogProps) => {
 
     return (
         <Dialog open={props.open} onClose={props.onClose} fullWidth maxWidth="xs">
-            <DialogTitle>Crear regla</DialogTitle>
+            <DialogTitle>{ props.rule === null ? "Crear regla" : "Editar regla" }</DialogTitle>
 
             <DialogContent dividers>
                 <Grid container spacing={2} sx={{ mb: 2 }}>
