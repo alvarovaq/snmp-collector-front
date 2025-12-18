@@ -38,18 +38,29 @@ export const GetOperatorText = (operator: Operator) => {
     switch (operator)
     {
         case Operator.GREATER_THAN:
-            return "Mayor que (>)";
+            return "Mayor que";
         case Operator.GREATER_OR_EQUAL:
-            return "Mayor o igual que (>=)";
+            return "Mayor o igual que";
         case Operator.LESS_THAN:
-            return "Menor que (<)";
+            return "Menor que";
         case Operator.LESS_OR_EQUAL:
-            return "Menor o igual que (<=)";
+            return "Menor o igual que";
         case Operator.EQUAL:
-            return "Igual que (==)";
+            return "Igual que";
         case Operator.NOT_EQUAL:
-            return "Distinto que (!=)";
+            return "Distinto que";
         default:
             return "Desconocido";
     }
+};
+
+export const OperatorRequiresNumber = (operator: Operator) => {
+    const numericOperators: Operator[] = [
+        Operator.GREATER_THAN,
+        Operator.GREATER_OR_EQUAL,
+        Operator.LESS_THAN,
+        Operator.LESS_OR_EQUAL,
+    ];
+
+    return numericOperators.includes(operator);
 };
