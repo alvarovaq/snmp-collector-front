@@ -4,7 +4,7 @@ import { Device, OidRecord } from "models";
 import { DevicesModule, ReduxState } from "store";
 import { DeviceTableComponent, OidsDeviceComponent, DeviceDialog } from "../components";
 import { Status } from "../models";
-import { Box, Typography, Paper } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { DevicesClient } from "clients";
 import { useNotification } from "context";
 import { selectIsAdmin } from "store/selectors";
