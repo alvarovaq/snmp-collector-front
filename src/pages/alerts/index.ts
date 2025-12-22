@@ -1,1 +1,1 @@
-export * from "./alerts.page";
+export * from "./containers/alerts.page";

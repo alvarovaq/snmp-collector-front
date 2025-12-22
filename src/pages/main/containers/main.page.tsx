@@ -7,7 +7,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import { Device, OidRecord, OidRecordID, WSEvent } from "models";
-import { AppModule, DevicesModule, OidRecordsModule, ReportsModule } from "store";
+import { AppModule, DevicesModule, OidRecordsModule, ReportsModule, RulesModule } from "store";
 import { useWS } from "context";
 import { DashboardPage } from "pages/dashboard";
 import { DevicePage } from "pages/devices";
@@ -15,7 +15,7 @@ import { AlertsPage } from "pages/alerts";
 import { SettingsPage } from "pages/settings";
 import { loadInitialData } from "../utils/LoaderData";
 import { SidebarMenuItem, SidebarComponent, LoadingComponent } from "../components";
-import { Page, User } from "models";
+import { Page, User, Rule } from "models";
 import { authService } from "services";
 import { selectPage, selectUser } from "store/selectors";
 import { ReportsPage } from "pages/reports";
@@ -59,11 +59,22 @@ export const MainPage = () => {
       dispatch(DevicesModule.removeAction(data as number));
     });
 
+    const rmUpdateRule = addHandler(WSEvent.UpdateRule, (data) => {
+      dispatch(RulesModule.addAction(data as Rule));
+    });
+
+    const rmRemoveRule = addHandler(WSEvent.RemoveRule, (data) => {
+      dispatch(RulesModule.removeAction(data as number));
+      dispatch(DevicesModule.removeRuleAction(data as number));
+    });
+
     return () => {
       rmUpdateRecords();
       rmRemoveRecords();
       rmUpdateDevice();
       rmRemoveDevice();
+      rmUpdateRule();
+      rmRemoveRule();
     };
   }, [addHandler, dispatch]);
 

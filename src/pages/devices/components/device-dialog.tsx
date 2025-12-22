@@ -1,12 +1,12 @@
-import { Dialog, DialogTitle, TextField, DialogContent, DialogActions, Button, MenuItem, Grid, Typography, Divider, IconButton, } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import { SnmpVersion, SnmpV3AuthProtocol, SnmpV3PrivProtocol, SnmpV3SecurityLevel, Device, OidConfig, } from 'models';
+import { Dialog, DialogTitle, TextField, DialogContent, DialogActions, Button, MenuItem, Grid, Typography, Divider, } from '@mui/material';
+import { SnmpVersion, SnmpV3AuthProtocol, SnmpV3PrivProtocol, SnmpV3SecurityLevel, Device, OidConfig, Rule, } from 'models';
 import { useEffect, useState } from 'react';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { OidsForm } from './oids-form';
 
 export interface DeviceDialogProps {
     open: boolean;
     device: Device | null;
+	rules: Rule[];
     onClose: () => void;
     onSave: (device: Device) => void;
 }
@@ -87,22 +87,6 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
         return true;
     };
 
-    const addOid = (): void => {
-        setOids([...oids, { name: "", oid: "", frequency: 30 }]);
-    };
-
-    const updateOid = (index: number, field: string, value: any): void => {
-        const updated = [...oids];
-        updated[index] = { ...updated[index], [field]: value };
-        setOids(updated);
-    };
-
-    const removeOid = (index: number) => {
-        const updated = [...oids];
-        updated.splice(index, 1);
-        setOids(updated);
-    };
-
     const saveDevice = (): void => {
         if (!isFormValid()) return;
 
@@ -131,7 +115,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
     };
 
     return (    
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
             <DialogTitle>{ props.device ? "Editar dispositivo" : "Crear dispositivo"}</DialogTitle>
 
             <DialogContent dividers>
@@ -306,59 +290,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
                         <Divider />
                     </Grid>
 
-                    <Grid container spacing={1} sx={{ width: "100%" }} >
-                        {oids.map((oidItem, index) => (
-                            <Grid key={index} container sx={{ width: "100%" }} >
-                                <Grid size={4}>
-                                    <TextField
-                                        label="Nombre"
-                                        value={oidItem.name}
-                                        onChange={(e) => updateOid(index, "name", e.target.value)}
-                                        fullWidth
-                                        required
-                                    />
-                                </Grid>
-
-                                <Grid size={4}>
-                                    <TextField
-                                        label="OID"
-                                        value={oidItem.oid}
-                                        onChange={(e) => updateOid(index, "oid", e.target.value)}
-                                        fullWidth
-                                        required
-                                    />
-                                </Grid>
-
-                                <Grid size={3}>
-                                    <TextField
-                                        label="Frecuencia (seg)"
-                                        type="number"
-                                        value={oidItem.frequency}
-                                        onChange={(e) =>
-                                            updateOid(index, "frequency", Number(e.target.value))
-                                        }
-                                        fullWidth
-                                        required
-                                        error={oidItem.frequency < 10}
-                                        helperText={oidItem.frequency < 10 ? "Mínimo 10 segundos" : ""}
-                                        inputProps={{min: 1}}
-                                    />
-                                </Grid>
-
-                                <Grid size={1} sx={{ display: "flex", alignItems: "center" }}>
-                                    <IconButton aria-label="delete" color="error" onClick={() => removeOid(index)}>
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </Grid>
-                            </Grid>
-                        ))}
-                    </Grid>
-
-                    <Grid size={12}>
-                        <Button variant="outlined" onClick={addOid} startIcon={<AddIcon />}>
-                            Agregar OID
-                        </Button>
-                    </Grid>
+                    <OidsForm oids={oids} onChange={(oids) => setOids(oids)} rules={props.rules} />
                 </Grid>
             </DialogContent>
 
