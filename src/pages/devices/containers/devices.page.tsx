@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Device, OidRecord } from "models";
+import { Device, OidRecord, Rule } from "models";
 import { DevicesModule, ReduxState } from "store";
 import { DeviceTableComponent, OidsDeviceComponent, DeviceDialog } from "../components";
 import { Status } from "../models";
@@ -12,6 +12,7 @@ import { ConfirmDlg } from "components";
 
 const selectDevices = (state: ReduxState): Device[] => state.devices;
 const selectRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
+const selectRules = (state: ReduxState): Rule[] => state.rules;
 
 export const DevicePage = () => {
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
@@ -22,6 +23,7 @@ export const DevicePage = () => {
 
   const devices: Device[] = useSelector(selectDevices);
   const records: OidRecord[] = useSelector(selectRecords);
+  const rules: Rule[] = useSelector(selectRules);
 
   const { notify } = useNotification();
 
@@ -145,7 +147,7 @@ export const DevicePage = () => {
         </Box>
       )}
 
-      <DeviceDialog open={openDeviceDlg} onClose={onCloseDeviceDlg} onSave={onSaveDevice} device={editDevice} />
+      <DeviceDialog open={openDeviceDlg} onClose={onCloseDeviceDlg} onSave={onSaveDevice} device={editDevice} rules={rules} />
       <ConfirmDlg open={openRmDeviceDlg} title={"Eliminar dispositivo"} onCancel={onCancelRmDevice} onConfirm={onConfirmRmDevice} >
         <Typography sx={{ mb: 2 }}>
             ¿Estás seguro de querer eliminar el dispositivo{" "}

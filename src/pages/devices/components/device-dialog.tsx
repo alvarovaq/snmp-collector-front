@@ -1,12 +1,14 @@
 import { Dialog, DialogTitle, TextField, DialogContent, DialogActions, Button, MenuItem, Grid, Typography, Divider, IconButton, } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { SnmpVersion, SnmpV3AuthProtocol, SnmpV3PrivProtocol, SnmpV3SecurityLevel, Device, OidConfig, } from 'models';
+import { SnmpVersion, SnmpV3AuthProtocol, SnmpV3PrivProtocol, SnmpV3SecurityLevel, Device, OidConfig, Rule, } from 'models';
 import { useEffect, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { RulesInput } from './rules-input';
 
 export interface DeviceDialogProps {
     open: boolean;
     device: Device | null;
+	rules: Rule[];
     onClose: () => void;
     onSave: (device: Device) => void;
 }
@@ -27,6 +29,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
     const [privProtocol, setPrivProtocol] = useState<SnmpV3PrivProtocol | undefined>(undefined);
     const [privKey, setPrivKey] = useState("");
     const [oids, setOids] = useState<Array<OidConfig>>([]);
+	const [rules, setRules] = useState<Array<number>>([]);
 
     useEffect(() => {
         if (open) {
@@ -97,6 +100,12 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
         setOids(updated);
     };
 
+	const updateRules = (index: number, values: number[]): void => {
+		const updated = [...oids];
+		updated[index] = { ...updated[index], rules: [...values] };
+		setOids(updated);
+	};
+
     const removeOid = (index: number) => {
         const updated = [...oids];
         updated.splice(index, 1);
@@ -131,7 +140,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
     };
 
     return (    
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
             <DialogTitle>{ props.device ? "Editar dispositivo" : "Crear dispositivo"}</DialogTitle>
 
             <DialogContent dividers>
@@ -309,7 +318,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
                     <Grid container spacing={1} sx={{ width: "100%" }} >
                         {oids.map((oidItem, index) => (
                             <Grid key={index} container sx={{ width: "100%" }} >
-                                <Grid size={4}>
+                                <Grid size={3}>
                                     <TextField
                                         label="Nombre"
                                         value={oidItem.name}
@@ -319,7 +328,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
                                     />
                                 </Grid>
 
-                                <Grid size={4}>
+                                <Grid size={3}>
                                     <TextField
                                         label="OID"
                                         value={oidItem.oid}
@@ -329,7 +338,7 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
                                     />
                                 </Grid>
 
-                                <Grid size={3}>
+                                <Grid size={2}>
                                     <TextField
                                         label="Frecuencia (seg)"
                                         type="number"
@@ -343,6 +352,10 @@ export const DeviceDialog = (props: DeviceDialogProps) => {
                                         helperText={oidItem.frequency < 10 ? "Mínimo 10 segundos" : ""}
                                         inputProps={{min: 1}}
                                     />
+                                </Grid>
+
+                                <Grid size={3} >
+									<RulesInput rules={props.rules} values={oidItem.rules} onChange={(values) => updateRules(index, values)} />
                                 </Grid>
 
                                 <Grid size={1} sx={{ display: "flex", alignItems: "center" }}>
