@@ -1,15 +1,18 @@
-import { Alarm, Rule } from "models";
+import { Alarm, Device, OidRecord, Rule } from "models";
 import { useDispatch, useSelector } from "react-redux";
 import { Typography, Box, } from "@mui/material";
 import { ReduxState, RulesModule } from "store";
-import { RulesTableComponent, RuleDialog } from "../components";
-import { useState } from "react";
+import { RulesTableComponent, RuleDialog, AlarmsTableComponent } from "../components";
+import { useMemo, useState } from "react";
 import { useNotification } from "context";
 import { RulesClient } from "clients/rules.client";
 import { ConfirmDlg } from "components";
+import { AlarmItem } from "../models";
 
 const selectRules = (state: ReduxState): Rule[] => state.rules;
 const selectAlarms = (state: ReduxState): Alarm[] => state.alarms;
+const selectDevices = (state: ReduxState): Device[] => state.devices;
+const selectOidRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
 
 interface RuleDlgState {
     open: boolean;
@@ -27,9 +30,33 @@ export const AlarmsPage = () => {
 
     const rules = useSelector(selectRules);
     const alarms = useSelector(selectAlarms);
+    const devices = useSelector(selectDevices);
+    const oidRecords = useSelector(selectOidRecords);
 
     const { notify } = useNotification();
     const dispatch = useDispatch();
+
+    const alarmsItems = useMemo(
+        () =>
+          alarms.map(a => {
+            const device = devices.find(d => d.id === a.deviceId);
+            const oid = device?.oids.find(o => o.oid === a.oid);
+            const rule = rules.find(r => r.id === a.ruleId);
+            const oidRecord = oidRecords.find(o => o.deviceId === a.deviceId && o.oid === a.oid);
+            return {
+                id: a.id,
+                device: device?.name ?? "",
+                oid: oid?.name ?? "",
+                rule: rule?.name ?? "",
+                date: a.date,
+                message: a.message,
+                severity: a.severity,
+                readed: a.readed,
+                value: oidRecord?.value ?? "",
+            } as AlarmItem
+          }),
+        [devices, alarms, rules, oidRecords]
+      );
 
     const addRule = async (rule: Rule): Promise<void> => {
         try {
@@ -100,16 +127,14 @@ export const AlarmsPage = () => {
     return (
         <Box sx={{ display: "flex", flexDirection: "column", width: "100%", py: 4, px: 2 }}>
             <Typography variant="h5" sx={{ mb: 4 }}>
-                Reglas
+                Alertas
             </Typography>
 
-            {
-                alarms.map(alarm => {
-                    return (
-                        <p>${alarm.message}</p>
-                    );
-                })
-            }
+            <AlarmsTableComponent items={alarmsItems} />
+            
+            <Typography variant="h5" sx={{ my: 4 }}>
+                Reglas
+            </Typography>
 
             <RulesTableComponent rules={rules} permission={true} onSelectRule={(rule: Rule) => {}} onCreate={onAddRule} onUpdate={onEditRule} onDelete={onRemoveRule} />
 

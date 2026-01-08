@@ -8,14 +8,15 @@ export const alarmsSlice: Slice<Alarm[]> = createSlice({
     initialState,
     reducers: (create: ReducerCreators<Alarm[]>) => ({
         set: create.reducer<Alarm[]>((state, action) => {
-            return action.payload;
+            return action.payload.map(a => { return {...a, date: new Date(a.date)} as Alarm; });
         }),
         add: create.reducer<Alarm>((state, action) => {
             const index = state.findIndex((r) => r.id === action.payload.id);
+            const alarm = { ...action.payload, date: new Date(action.payload.date) } as Alarm;
             if (index !== -1) {
-                state[index] = action.payload;
+                state[index] = alarm;
             } else {
-                state.push(action.payload);
+                state.push(alarm);
             }
         }),
         remove: create.reducer<number>((state, action) => {
