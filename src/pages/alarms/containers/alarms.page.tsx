@@ -1,4 +1,4 @@
-import { Rule } from "models";
+import { Alarm, Rule } from "models";
 import { useDispatch, useSelector } from "react-redux";
 import { Typography, Box, } from "@mui/material";
 import { ReduxState, RulesModule } from "store";
@@ -9,6 +9,7 @@ import { RulesClient } from "clients/rules.client";
 import { ConfirmDlg } from "components";
 
 const selectRules = (state: ReduxState): Rule[] => state.rules;
+const selectAlarms = (state: ReduxState): Alarm[] => state.alarms;
 
 interface RuleDlgState {
     open: boolean;
@@ -20,11 +21,12 @@ interface RmRuleState {
     rule: Rule | null;
 }
 
-export const AlertsPage = () => {
+export const AlarmsPage = () => {
     const [ruleDlgState, setRuleDlgState] = useState<RuleDlgState>({ open: false, rule: null });
     const [rmRuleState, setRmRuleState] = useState<RmRuleState>({ open: false, rule: null });
 
     const rules = useSelector(selectRules);
+    const alarms = useSelector(selectAlarms);
 
     const { notify } = useNotification();
     const dispatch = useDispatch();
@@ -100,6 +102,14 @@ export const AlertsPage = () => {
             <Typography variant="h5" sx={{ mb: 4 }}>
                 Reglas
             </Typography>
+
+            {
+                alarms.map(alarm => {
+                    return (
+                        <p>${alarm.message}</p>
+                    );
+                })
+            }
 
             <RulesTableComponent rules={rules} permission={true} onSelectRule={(rule: Rule) => {}} onCreate={onAddRule} onUpdate={onEditRule} onDelete={onRemoveRule} />
 

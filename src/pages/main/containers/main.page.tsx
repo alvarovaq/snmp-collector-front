@@ -6,12 +6,12 @@ import DnsIcon from '@mui/icons-material/Dns';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
 import TimelineIcon from '@mui/icons-material/Timeline';
-import { Device, OidRecord, OidRecordID, WSEvent } from "models";
-import { AppModule, DevicesModule, OidRecordsModule, ReportsModule, RulesModule } from "store";
+import { Alarm, Device, OidRecord, OidRecordID, WSEvent } from "models";
+import { AlarmsModule, AppModule, DevicesModule, OidRecordsModule, ReportsModule, RulesModule } from "store";
 import { useWS } from "context";
 import { DashboardPage } from "pages/dashboard";
 import { DevicePage } from "pages/devices";
-import { AlertsPage } from "pages/alerts";
+import { AlarmsPage } from "pages/alarms";
 import { SettingsPage } from "pages/settings";
 import { loadInitialData } from "../utils/LoaderData";
 import { SidebarMenuItem, SidebarComponent, LoadingComponent } from "../components";
@@ -68,6 +68,14 @@ export const MainPage = () => {
       dispatch(DevicesModule.removeRuleAction(data as number));
     });
 
+    const rmUpdateAlarm = addHandler(WSEvent.UpdateAlarm, (data) => {
+      dispatch(AlarmsModule.addAction(data as Alarm));
+    });
+
+    const rmRemoveAlarm = addHandler(WSEvent.RemoveAlarm, (data) => {
+      dispatch(AlarmsModule.removeAction(data as number));
+    });
+
     return () => {
       rmUpdateRecords();
       rmRemoveRecords();
@@ -75,6 +83,8 @@ export const MainPage = () => {
       rmRemoveDevice();
       rmUpdateRule();
       rmRemoveRule();
+      rmUpdateAlarm();
+      rmRemoveAlarm();
     };
   }, [addHandler, dispatch]);
 
@@ -100,7 +110,7 @@ export const MainPage = () => {
             page === Page.DEVICES ?
               (<DevicePage />) :
               page === Page.ALERTS ?
-                (<AlertsPage />) :
+                (<AlarmsPage />) :
                 page === Page.REPORTS ?
                   (<ReportsPage />) :
                   page === Page.SETTINGS ?
