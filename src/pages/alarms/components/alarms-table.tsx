@@ -1,15 +1,34 @@
-import { Box, Chip, } from "@mui/material";
+import { Box, Chip, Tooltip, IconButton, } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import MarkunreadIcon from '@mui/icons-material/Markunread';
+import DraftsIcon from '@mui/icons-material/Drafts';
 import { esES } from "@mui/x-data-grid/locales";
 import { GetSeverityColor, GetSeverityText } from "utils/rules";
 import { AlarmItem } from "../models";
 
 interface AlarmsTableComponentProps {
   items: AlarmItem[];
+  onRead: (alarmId: number, readed: boolean) => void;
 }
 
 export const AlarmsTableComponent = (props: AlarmsTableComponentProps) => {
   const columns: GridColDef<AlarmItem>[] = [
+    {
+      field: "actions",
+      headerName: "",
+      width: 40,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <Tooltip title={ params.row.readed ? "Marcar como no leída" : "Marcar como leída" }>
+          <IconButton onClick={() => props.onRead(params.row.id, !params.row.readed)} >
+            {
+              params.row.readed ? <DraftsIcon /> : <MarkunreadIcon />
+            }
+          </IconButton>
+        </Tooltip>
+      ),
+    },
     {
       field: "device",
       headerName: "Dispositivo",
@@ -75,6 +94,7 @@ export const AlarmsTableComponent = (props: AlarmsTableComponentProps) => {
             <DataGrid<AlarmItem>
                 rows={props.items}
                 columns={columns}
+                getRowClassName={(params) => params.row.readed ? "alarm-read" : ""}
                 pageSizeOptions={[5, 10, 20]}
                 initialState={{
                     pagination: { paginationModel: { pageSize: 10, page: 0 } },
@@ -82,6 +102,12 @@ export const AlarmsTableComponent = (props: AlarmsTableComponentProps) => {
                 sx={{
                     cursor: "pointer",
                     "& .MuiDataGrid-row:hover": { backgroundColor: "action.hover" },
+                    "& .MuiDataGrid-row.alarm-read": {
+                      opacity: 0.6,
+                    },
+                    "& .MuiDataGrid-row.alarm-read:hover": {
+                      backgroundColor: "action.selected",
+                    },
                     "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
                         outline: "none",
                     },
