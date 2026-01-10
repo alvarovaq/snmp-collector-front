@@ -47,7 +47,7 @@ export const AlarmsTableComponent = (props: AlarmsTableComponentProps) => {
 	const [showOnlyUnreaded, setShowOnlyUnreaded] = useState<boolean>(false);
 	
 	const filteredAlarms = useMemo(() => {
-		return showOnlyUnreaded ? props.items.filter(i => !i.readed) : props.items;
+		return (showOnlyUnreaded ? props.items.filter(i => !i.readed) : props.items);
 	}, [props.items, showOnlyUnreaded]);
 	
 	const columns: GridColDef<AlarmItem>[] = [

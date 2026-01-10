@@ -8,7 +8,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import { Alarm, Device, OidRecord, OidRecordID, WSEvent } from "models";
 import { AlarmsModule, AppModule, DevicesModule, OidRecordsModule, ReportsModule, RulesModule } from "store";
-import { useWS } from "context";
+import { useNotification, useWS } from "context";
 import { DashboardPage } from "pages/dashboard";
 import { DevicePage } from "pages/devices";
 import { AlarmsPage } from "pages/alarms";
@@ -33,6 +33,8 @@ export const MainPage = () => {
   
   const user: User | null = useSelector(selectUser);
   const page: Page = useSelector(selectPage);
+
+  const { notify } = useNotification();
 
   const dispatch = useDispatch();
   const { addHandler } = useWS();
@@ -69,6 +71,7 @@ export const MainPage = () => {
     });
 
     const rmUpdateAlarm = addHandler(WSEvent.UpdateAlarm, (data) => {
+      notify("Nueva alerta", "warning");
       dispatch(AlarmsModule.addAction(data as Alarm));
     });
 
