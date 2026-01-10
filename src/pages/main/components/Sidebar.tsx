@@ -8,6 +8,7 @@ export interface SidebarMenuItem {
   text: string;
   icon: React.ReactElement<SvgIconProps>;
   page: Page;
+  element?: React.ReactElement;
 }
 
 interface SidebarComponentProps {
@@ -99,6 +100,9 @@ export const SidebarComponent = (props: SidebarComponentProps) => {
                     {item.icon}
                   </ListItemIcon>
                   <ListItemText primary={item.text} sx={{ fontWeight: 600 }} />
+                  {
+                    item.element ? item.element : (<></>)
+                  }
                 </ListItemButton>
               </ListItem>
             ))}
