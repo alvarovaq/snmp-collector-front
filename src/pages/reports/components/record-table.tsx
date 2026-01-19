@@ -35,7 +35,7 @@ const CustomFooter = (props: CustomFooterProps) => {
 			<GridPagination />
 		</Box>
     );
-  }
+}
 
 interface RecordTableComponentProps {
   	records: OidRecord[];

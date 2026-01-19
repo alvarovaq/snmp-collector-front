@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Box } from "@mui/material";
+import { Box, Badge } from "@mui/material";
 import HomeIcon from '@mui/icons-material/Home';
 import DnsIcon from '@mui/icons-material/Dns';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
 import TimelineIcon from '@mui/icons-material/Timeline';
-import { Device, OidRecord, OidRecordID, WSEvent } from "models";
-import { AppModule, DevicesModule, OidRecordsModule, ReportsModule, RulesModule } from "store";
-import { useWS } from "context";
+import { Alarm, Device, OidRecord, OidRecordID, Severity, WSEvent } from "models";
+import { AlarmsModule, AppModule, DevicesModule, OidRecordsModule, ReportsModule, RulesModule } from "store";
+import { selectAlarmsUnreaded } from "store/selectors";
+import { useNotification, useWS } from "context";
 import { DashboardPage } from "pages/dashboard";
 import { DevicePage } from "pages/devices";
-import { AlertsPage } from "pages/alerts";
+import { AlarmsPage } from "pages/alarms";
 import { SettingsPage } from "pages/settings";
 import { loadInitialData } from "../utils/LoaderData";
 import { SidebarMenuItem, SidebarComponent, LoadingComponent } from "../components";
@@ -19,11 +20,32 @@ import { Page, User, Rule } from "models";
 import { authService } from "services";
 import { selectPage, selectUser } from "store/selectors";
 import { ReportsPage } from "pages/reports";
+import { GetSeverityColor, GetSeverityValue } from '../../../utils/rules';
+
+const BadgeAlerts = () => {
+  const alarms = useSelector(selectAlarmsUnreaded);
+  const length = alarms.length;
+  if (length > 0) {
+    const severity: Severity = alarms.map(a => a.severity).reduce((max: Severity, severity: Severity) => GetSeverityValue(severity) > GetSeverityValue(max) ? severity : max, Severity.INFO);
+    return (
+      <Badge
+        badgeContent={length}
+        sx={{
+          "& .MuiBadge-badge": {
+            backgroundColor: GetSeverityColor(severity)
+          }
+        }}
+      />
+    );
+  }
+  else
+    return (<></>);
+};
 
 const appMenuItems: SidebarMenuItem[] = [
   { text: 'Inicio', icon: <HomeIcon />, page: Page.DASHBOARD },
   { text: 'Dispositivos', icon: <DnsIcon />, page: Page.DEVICES },
-  { text: 'Alertas', icon: <NotificationsIcon />, page: Page.ALERTS },
+  { text: 'Alertas', icon: <NotificationsIcon />, page: Page.ALERTS, element: <BadgeAlerts /> },
   { text: 'Históricos', icon: <TimelineIcon />, page: Page.REPORTS },
   { text: 'Configuración', icon: <SettingsIcon />, page: Page.SETTINGS },
 ];
@@ -33,6 +55,8 @@ export const MainPage = () => {
   
   const user: User | null = useSelector(selectUser);
   const page: Page = useSelector(selectPage);
+
+  const { notify } = useNotification();
 
   const dispatch = useDispatch();
   const { addHandler } = useWS();
@@ -68,6 +92,15 @@ export const MainPage = () => {
       dispatch(DevicesModule.removeRuleAction(data as number));
     });
 
+    const rmUpdateAlarm = addHandler(WSEvent.UpdateAlarm, (data) => {
+      notify("Nueva alerta", "warning");
+      dispatch(AlarmsModule.addAction(data as Alarm));
+    });
+
+    const rmRemoveAlarm = addHandler(WSEvent.RemoveAlarm, (data) => {
+      dispatch(AlarmsModule.removeAction(data as number));
+    });
+
     return () => {
       rmUpdateRecords();
       rmRemoveRecords();
@@ -75,6 +108,8 @@ export const MainPage = () => {
       rmRemoveDevice();
       rmUpdateRule();
       rmRemoveRule();
+      rmUpdateAlarm();
+      rmRemoveAlarm();
     };
   }, [addHandler, dispatch]);
 
@@ -100,7 +135,7 @@ export const MainPage = () => {
             page === Page.DEVICES ?
               (<DevicePage />) :
               page === Page.ALERTS ?
-                (<AlertsPage />) :
+                (<AlarmsPage />) :
                 page === Page.REPORTS ?
                   (<ReportsPage />) :
                   page === Page.SETTINGS ?

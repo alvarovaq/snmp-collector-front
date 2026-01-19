@@ -7,3 +7,4 @@ export * from "./users.model";
 export * from "./app.model";
 export * from "./reports.model";
 export * from "./rules.model";
+export * from "./alarms.model";

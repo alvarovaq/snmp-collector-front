@@ -17,6 +17,23 @@ export const GetSeverityColor = (severity: Severity) => {
     }
 };
 
+export const GetSeverityValue = (severity: Severity): number => {
+    switch (severity) {
+        case Severity.INFO:
+            return 0;
+        case Severity.WARNING:
+            return 1;
+        case Severity.MINOR:
+            return 2;
+        case Severity.MAJOR:
+            return 3;
+        case Severity.CRITICAL:
+            return 4;
+        default:
+            return -1;
+    }
+};
+
 export const GetSeverityText = (severity: Severity) => {
     switch (severity) {
         case Severity.INFO:

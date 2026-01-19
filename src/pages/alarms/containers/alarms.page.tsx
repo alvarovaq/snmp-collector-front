@@ -1,14 +1,19 @@
-import { Rule } from "models";
+import { Alarm, Device, OidRecord, Rule } from "models";
 import { useDispatch, useSelector } from "react-redux";
 import { Typography, Box, } from "@mui/material";
-import { ReduxState, RulesModule } from "store";
-import { RulesTableComponent, RuleDialog } from "../components";
-import { useState } from "react";
+import { AlarmsModule, ReduxState, RulesModule } from "store";
+import { RulesTableComponent, RuleDialog, AlarmsTableComponent } from "../components";
+import { useMemo, useState } from "react";
 import { useNotification } from "context";
 import { RulesClient } from "clients/rules.client";
 import { ConfirmDlg } from "components";
+import { AlarmItem } from "../models";
+import { AlarmsClient } from "clients";
 
 const selectRules = (state: ReduxState): Rule[] => state.rules;
+const selectAlarms = (state: ReduxState): Alarm[] => state.alarms;
+const selectDevices = (state: ReduxState): Device[] => state.devices;
+const selectOidRecords = (state: ReduxState): OidRecord[] => state.oidRecords;
 
 interface RuleDlgState {
     open: boolean;
@@ -20,14 +25,39 @@ interface RmRuleState {
     rule: Rule | null;
 }
 
-export const AlertsPage = () => {
+export const AlarmsPage = () => {
     const [ruleDlgState, setRuleDlgState] = useState<RuleDlgState>({ open: false, rule: null });
     const [rmRuleState, setRmRuleState] = useState<RmRuleState>({ open: false, rule: null });
 
     const rules = useSelector(selectRules);
+    const alarms = useSelector(selectAlarms);
+    const devices = useSelector(selectDevices);
+    const oidRecords = useSelector(selectOidRecords);
 
     const { notify } = useNotification();
     const dispatch = useDispatch();
+
+    const alarmsItems = useMemo(
+        () =>
+          alarms.map(a => {
+            const device = devices.find(d => d.id === a.deviceId);
+            const oid = device?.oids.find(o => o.oid === a.oid);
+            const rule = rules.find(r => r.id === a.ruleId);
+            const oidRecord = oidRecords.find(o => o.deviceId === a.deviceId && o.oid === a.oid);
+            return {
+                id: a.id,
+                device: device?.name ?? "",
+                oid: oid?.name ?? "",
+                rule: rule?.name ?? "",
+                date: a.date,
+                message: a.message,
+                severity: a.severity,
+                readed: a.readed,
+                value: oidRecord?.value ?? "",
+            } as AlarmItem
+          }),
+        [devices, alarms, rules, oidRecords]
+      );
 
     const addRule = async (rule: Rule): Promise<void> => {
         try {
@@ -58,6 +88,26 @@ export const AlertsPage = () => {
             notify("Regla eliminada correctamente", "success");
         } catch (error) {
             notify("Error al eliminar la regla", "error");
+            console.error("Error al eliminar regla", error);
+        }
+    };
+
+    const readAlarm = async (alarmId: number): Promise<void> => {
+        try {
+            const alarm = await AlarmsClient.read(alarmId);
+            dispatch(AlarmsModule.addAction(alarm));
+        } catch (error) {
+            notify("Error al leer alarma", "error");
+            console.error("Error al eliminar regla", error);
+        }
+    };
+
+    const unreadAlarm = async (alarmId: number): Promise<void> => {
+        try {
+            const alarm = await AlarmsClient.unread(alarmId);
+            dispatch(AlarmsModule.addAction(alarm));
+        } catch (error) {
+            notify("Error al marcar alarma como no leída", "error");
             console.error("Error al eliminar regla", error);
         }
     };
@@ -94,10 +144,23 @@ export const AlertsPage = () => {
     const onCloseRmRule = (): void => {
         setRmRuleState({ ...rmRuleState, open: false });
     };
+
+    const onReadAlarm = (alarmId: number, readed: boolean): void => {
+        if (readed)
+            readAlarm(alarmId);
+        else
+            unreadAlarm(alarmId);
+    };
     
     return (
         <Box sx={{ display: "flex", flexDirection: "column", width: "100%", py: 4, px: 2 }}>
             <Typography variant="h5" sx={{ mb: 4 }}>
+                Alertas
+            </Typography>
+
+            <AlarmsTableComponent items={alarmsItems} onRead={onReadAlarm} />
+            
+            <Typography variant="h5" sx={{ my: 4 }}>
                 Reglas
             </Typography>
 

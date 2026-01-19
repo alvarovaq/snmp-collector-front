@@ -5,9 +5,10 @@ import * as AuthModule from "./modules/auth";
 import * as AppModule from "./modules/app";
 import * as ReportsModule from "./modules/reports";
 import * as RulesModule from "./modules/rules";
-import { Device, OidRecord, AuthState, AppState, ReportFilter, Rule } from "models";
+import * as AlarmsModule from "./modules/alarms";
+import { Device, OidRecord, AuthState, AppState, ReportFilter, Rule, Alarm } from "models";
 
-export { DevicesModule, OidRecordsModule, AuthModule, AppModule, ReportsModule, RulesModule };
+export { DevicesModule, OidRecordsModule, AuthModule, AppModule, ReportsModule, RulesModule, AlarmsModule };
 
 export interface ReduxState {
     devices: Device[],
@@ -16,6 +17,7 @@ export interface ReduxState {
     app: AppState,
     reports: ReportFilter,
     rules: Rule[],
+    alarms: Alarm[],
 }
 
 export const reducers: ReducersMapObject<ReduxState> = {
@@ -25,6 +27,7 @@ export const reducers: ReducersMapObject<ReduxState> = {
     app: AppModule.reducer,    
     reports: ReportsModule.reducer,
     rules: RulesModule.reducer,
+    alarms: AlarmsModule.reducer,
 };
 
 export const store: EnhancedStore = configureStore({
