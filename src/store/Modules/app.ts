@@ -2,7 +2,7 @@ import { ActionCreatorWithPayload, createSlice,ReducerCreators,Slice } from "@re
 import { AppState, Page, } from "models";
 
 const initialState: AppState = {
-    page: Page.DASHBOARD
+    page: Page.DEVICES
 };
 
 export const appStatusSlice: Slice<AppState> = createSlice({

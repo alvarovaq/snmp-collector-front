@@ -1,6 +1,5 @@
 export enum Page {
-    DASHBOARD = 0,
-    DEVICES,
+    DEVICES = 0,
     ALERTS,
     REPORTS,
     SETTINGS
