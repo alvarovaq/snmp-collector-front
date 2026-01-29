@@ -10,7 +10,6 @@ import { Alarm, Device, OidRecord, OidRecordID, Severity, WSEvent } from "models
 import { AlarmsModule, AppModule, DevicesModule, OidRecordsModule, ReportsModule, RulesModule } from "store";
 import { selectAlarmsUnreaded } from "store/selectors";
 import { useNotification, useWS } from "context";
-import { DashboardPage } from "pages/dashboard";
 import { DevicePage } from "pages/devices";
 import { AlarmsPage } from "pages/alarms";
 import { SettingsPage } from "pages/settings";
@@ -43,7 +42,6 @@ const BadgeAlerts = () => {
 };
 
 const appMenuItems: SidebarMenuItem[] = [
-  { text: 'Inicio', icon: <HomeIcon />, page: Page.DASHBOARD },
   { text: 'Dispositivos', icon: <DnsIcon />, page: Page.DEVICES },
   { text: 'Alertas', icon: <NotificationsIcon />, page: Page.ALERTS, element: <BadgeAlerts /> },
   { text: 'Históricos', icon: <TimelineIcon />, page: Page.REPORTS },
@@ -130,17 +128,15 @@ export const MainPage = () => {
       <SidebarComponent menuItems={appMenuItems} page={page} onNavigate={onNavigate} user={user} onLogout={onLogout} />
       <Box sx={{ flewGrow: 1, width: "100%" }}>
         {
-          page === Page.DASHBOARD ?
-            (<DashboardPage />) :
-            page === Page.DEVICES ?
-              (<DevicePage />) :
-              page === Page.ALERTS ?
-                (<AlarmsPage />) :
-                page === Page.REPORTS ?
-                  (<ReportsPage />) :
-                  page === Page.SETTINGS ?
-                    (<SettingsPage />) :
-                    (<p>Página no encontrada</p>)
+          page === Page.DEVICES ?
+            (<DevicePage />) :
+            page === Page.ALERTS ?
+              (<AlarmsPage />) :
+              page === Page.REPORTS ?
+                (<ReportsPage />) :
+                page === Page.SETTINGS ?
+                  (<SettingsPage />) :
+                  (<p>Página no encontrada</p>)
         }
       </Box>
     </Box>
